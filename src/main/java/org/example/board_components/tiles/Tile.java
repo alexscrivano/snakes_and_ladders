@@ -1,5 +1,7 @@
 package org.example.board_components.tiles;
 
+import org.example.support.TileType;
+
 import java.io.Serializable;
 
 public abstract class Tile implements Serializable {

@@ -1,5 +1,7 @@
 package org.example.board_components.tiles;
 
+import org.example.support.TileType;
+
 public class SnakeTile extends Tile {
     private final TileType type = TileType.Snake;
     private EmptyTile destination;

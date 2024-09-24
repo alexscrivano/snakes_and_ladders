@@ -1,4 +1,4 @@
-package org.example.game;
+package org.example.support;
 
 public enum GameType {
     Standard,

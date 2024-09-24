@@ -1,4 +1,4 @@
-package org.example.game;
+package org.example.support;
 
 public class Player {
     private int playerIndex;

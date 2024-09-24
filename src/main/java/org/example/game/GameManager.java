@@ -4,10 +4,12 @@ import org.example.board_components.boards.GameBoard;
 import org.example.board_components.builders.BoardBuilder;
 import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
-import org.example.board_components.tiles.TileType;
+import org.example.support.TileType;
 import org.example.game.turns.EndedState;
 import org.example.game.turns.MovingState;
 import org.example.game.turns.State;
+import org.example.support.GameType;
+import org.example.support.Player;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.example.board_components.tiles;
+package org.example.support;
 
 public enum TileType {
     Empty,

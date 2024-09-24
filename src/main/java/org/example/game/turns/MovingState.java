@@ -1,9 +1,9 @@
 package org.example.game.turns;
 
 import org.example.board_components.tiles.Tile;
-import org.example.board_components.tiles.TileType;
+import org.example.support.TileType;
 import org.example.game.GameManager;
-import org.example.game.Player;
+import org.example.support.Player;
 import org.example.game.commands.DiceRoll;
 
 import java.util.Map;
@@ -34,6 +34,7 @@ public class MovingState implements State{
                 boolean isEmpty = check(newTile);
                 if(isEmpty) p.setLastTile(newTile);
                 else {
+                    //Need to add a check for special tiles TODO
                     newTile = g.getBoard().getTile(newTile).getDestination().getNumber();
                     p.setLastTile(newTile);
                 }

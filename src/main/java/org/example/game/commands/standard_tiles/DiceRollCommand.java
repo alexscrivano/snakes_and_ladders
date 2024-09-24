@@ -1,8 +1,10 @@
-package org.example.game.commands;
+package org.example.game.commands.standard_tiles;
+
+import org.example.game.commands.Command;
 
 import java.util.Random;
 
-public class DiceRoll implements Command {
+public class DiceRollCommand implements Command {
     private int dice1, dice2;
     private int total;
     private Random roll = new Random();
@@ -12,6 +14,11 @@ public class DiceRoll implements Command {
         this.dice1 = roll.nextInt(1,7);
         this.dice2 = roll.nextInt(1,7);
         this.total = dice1 + dice2;
+    }
+
+    @Override
+    public int getNextTile() {
+        return 0;
     }
 
     public int getResult() {return total;}

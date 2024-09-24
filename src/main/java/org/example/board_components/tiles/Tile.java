@@ -1,6 +1,6 @@
 package org.example.board_components.tiles;
 
-import org.example.support.TileType;
+import org.example.support.tiles.TileType;
 
 import java.io.Serializable;
 

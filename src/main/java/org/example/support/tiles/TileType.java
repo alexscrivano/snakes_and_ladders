@@ -1,4 +1,4 @@
-package org.example.support;
+package org.example.support.tiles;
 
 public enum TileType {
     Empty,

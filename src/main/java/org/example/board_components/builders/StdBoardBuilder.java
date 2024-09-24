@@ -1,10 +1,10 @@
 package org.example.board_components.builders;
 
 import org.example.board_components.boards.GameBoard;
-import org.example.support.TileType;
-import org.example.board_components.tiles.EmptyTile;
-import org.example.board_components.tiles.LadderTile;
-import org.example.board_components.tiles.SnakeTile;
+import org.example.support.tiles.TileType;
+import org.example.board_components.tiles.standard.EmptyTile;
+import org.example.board_components.tiles.standard.LadderTile;
+import org.example.board_components.tiles.standard.SnakeTile;
 import org.example.board_components.tiles.Tile;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class StdBoardBuilder implements BoardBuilder { // Build the game board w
 
     @Override
     public void buildBoard() {
-        board = new GameBoard();
+        this.board = new GameBoard();
     }
 
     @Override
@@ -87,6 +87,9 @@ public class StdBoardBuilder implements BoardBuilder { // Build the game board w
             }
         }
     }
+
+    @Override
+    public void buildSpecials(int n) {}
 
     @Override
     public GameBoard getGameBoard() {

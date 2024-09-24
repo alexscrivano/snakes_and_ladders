@@ -2,10 +2,12 @@ package org.example.game;
 
 import org.example.board_components.boards.GameBoard;
 import org.example.board_components.builders.BoardBuilder;
+import org.example.board_components.builders.SpecialRulesBuilder;
 import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
 import org.example.game.game_saver.FileGameSaver;
-import org.example.support.TileType;
+import org.example.game.turns.StoppedTurnState;
+import org.example.support.tiles.TileType;
 import org.example.game.turns.EndedTurnState;
 import org.example.game.turns.MovingTurnState;
 import org.example.game.turns.PlayerTurnState;
@@ -14,40 +16,58 @@ import org.example.support.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class GameManager {
     private BoardBuilder builder;
     private GameBoard board;
+    private GameType gameType;
 
     private int rows,cols,maxTiles;
-    private int playersNumber;
+    private int playersNumber,diceNumber;
 
     private Map<Player, PlayerTurnState> turns;
 
-    public GameManager(int rows, int cols, int playersNumber, GameType gType) {
+    public GameManager(int rows, int cols, int playersNumber, int diceNumber, GameType gType) {
         this.rows = rows;
         this.cols = cols;
         this.playersNumber = playersNumber;
         this.maxTiles = rows * cols;
-        if(gType == GameType.Standard) this.builder = new StdBoardBuilder();
+        this.diceNumber = diceNumber;
+        this.gameType = gType;
         this.turns = new HashMap<>();
+
+        if(gType == GameType.Standard) this.builder = new StdBoardBuilder();
+        else if(gType == GameType.MoreRules) this.builder = new SpecialRulesBuilder();
     }
+
+    public GameType getGameType() {return gameType;}
     public GameBoard getBoard(){return board;}
     public Map<Player, PlayerTurnState> getTurns(){return turns;}
+    /*
     public void setState(int player, PlayerTurnState s){
         for(Player p : turns.keySet()){
             if(p.getPlayerIndex() == player) turns.put(p,s);
         }
     }
+    */
     public int getMaxTiles(){return maxTiles;}
+    public int getDiceNumber(){return diceNumber;}
 
-    public void createGame(){
+    public void createGame(int type){
         builder.buildBoard();
         System.out.println("Board created!");
         this.board = builder.getGameBoard();
-        fillTheBoard();
+        if(type == 0) fillTheBoardStd();
+        else fillTheBoard();
     }
+
     private void fillTheBoard(){
+        fillTheBoardStd();
+        builder.buildSpecials(maxTiles);
+    }
+
+    private void fillTheBoardStd(){
         int n = maxTiles;
         for(int i = 0 ; i < rows ; i++){
             for(int j = 0 ; j < cols ; j++){
@@ -61,20 +81,19 @@ public class GameManager {
         builder.buildLadders(maxTiles,rows,m);
     }
 
-    public void play(){ //Per semplicitá per ora sará solo autoplay
+    public void autoplay(){
         for(int i = 0 ; i < playersNumber ; i++){
             turns.put(new Player(i),new EndedTurnState());
         }
         boolean done = false;
         while(!done){
             for(Player p : turns.keySet()){
-                if(turns.get(p) instanceof EndedTurnState){
-                    turns.put(p,new MovingTurnState());
-                    int t1 = p.getLastTile();
-                    turns.get(p).move(this,p.getPlayerIndex());
-                    int t2 = p.getLastTile();
-                    System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
-                }
+                if(turns.get(p) instanceof EndedTurnState) turns.put(p,new MovingTurnState());
+                int t1 = p.getLastTile();
+                turns.get(p).move(this,p);
+                int t2 = p.getLastTile();
+                System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
+
                 if(p.getLastTile() == 100) {
                     done = true;
                     System.out.println("Player "+p.getPlayerIndex()+" won!");
@@ -82,7 +101,28 @@ public class GameManager {
                 }
             }
         }
+    }
+    public void manual(GameType type){
+        for(int i = 0 ; i < playersNumber ; i++){
+            turns.put(new Player(i),new EndedTurnState());
+        }
+        boolean done = false;
+        if(type == GameType.MoreRules && diceNumber == 2){
+            while(!done){
+                for(Player p : turns.keySet()){
+                    if(p.getLastTile() == 100){
+                        done = true;
+                        System.out.println("Player "+p.getPlayerIndex()+" won!");
+                        break;
+                    }
+                    PlayerTurnState state = turns.get(p);
+                    if(state instanceof EndedTurnState) turns.put(p,new MovingTurnState());
 
+                }
+            }
+        }else{
+
+        }
     }
 
     public void save(String name){
@@ -92,8 +132,8 @@ public class GameManager {
 
 
     public static void main(String[] args) {
-        GameManager gm = new GameManager(10,10,2,GameType.Standard);
-        gm.createGame();
+        GameManager gm = new GameManager(10,10,2,2,GameType.MoreRules);
+        gm.createGame(1);
         //gm.save("save1");
 
         StringBuilder sb = new StringBuilder();
@@ -109,12 +149,14 @@ public class GameManager {
                 for(int j = 0 ; j < gm.cols ; j++){
                     Tile t = gm.board.getTile(i,j);
                     if(t.getDestination().getNumber() > 0) sb.append("| " + t.getNumber() + " " + t.getTileType() + " " + t.getDestination().getNumber() + " |").append("\t");
+                    else if(t.getTileType() != TileType.Empty && t.getTileType() != TileType.Snake && t.getTileType() != TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " |").append("\t");
                     else sb.append(t.getNumber() + "\t");
                 }
             }else{
                 for(int j = gm.cols-1; j >= 0 ; j--){
                     Tile t = gm.board.getTile(i,j);
                     if(t.getDestination().getNumber() > 0) sb.append("| " + t.getNumber() + " " + t.getTileType() + " " + t.getDestination().getNumber() + " |").append("\t");
+                    else if(t.getTileType() != TileType.Empty && t.getTileType() != TileType.Snake && t.getTileType() != TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " |").append("\t");
                     else sb.append(t.getNumber() + "\t");
                 }
             }
@@ -122,7 +164,7 @@ public class GameManager {
         }
         System.out.println(sb);
 
-        gm.play();
+        gm.autoplay();
 
     }
 

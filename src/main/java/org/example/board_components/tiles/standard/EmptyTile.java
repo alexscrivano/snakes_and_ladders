@@ -1,8 +1,9 @@
-package org.example.board_components.tiles;
+package org.example.board_components.tiles.standard;
 
-import org.example.support.TileType;
+import org.example.board_components.tiles.Tile;
+import org.example.support.tiles.TileType;
 
-public class EmptyTile extends Tile{
+public class EmptyTile extends Tile {
     private final TileType type = TileType.Empty;
     private Tile destination;
     public EmptyTile(int row, int col, int number) {

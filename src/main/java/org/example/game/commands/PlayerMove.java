@@ -1,8 +1,11 @@
 package org.example.game.commands;
 
+import org.example.board_components.tiles.EmptyTile;
+import org.example.board_components.tiles.LadderTile;
+import org.example.board_components.tiles.SnakeTile;
 import org.example.board_components.tiles.Tile;
 import org.example.game.GameManager;
-import org.example.game.turns.State;
+import org.example.game.turns.PlayerTurnState;
 import org.example.support.Player;
 import org.example.support.TileType;
 
@@ -20,27 +23,30 @@ public class PlayerMove implements Command {
 
     @Override
     public void execute() {
-        int currentTile = 1;
-        Map<Player, State> turns = game.getTurns();
+        Map<Player, PlayerTurnState> turns = game.getTurns();
         for(Player p : turns.keySet()) {
             if(p.getPlayerIndex() == player){
-                currentTile = p.getLastTile();
-                int max = game.getBoard().getBoard().size();
-                int nextTile = currentTile + roll;
-                if(nextTile > max){
-                    nextTile = max - (nextTile - max);
+                System.out.println("Player " + p.getPlayerIndex() + " rolled a " + roll);
+                int currentTile = p.getLastTile();
+                int max = game.getMaxTiles();
+                int next = currentTile + roll;
+                if(next > max){
+                    next = max - (next - max);
                 }
-                boolean isEmpty = checkTile(nextTile);
-                if(!isEmpty) p.setLastTile(nextTile);
-                else{
-                    // TODO add special tiles functions
-                    Tile next = game.getBoard().getTile(nextTile);
-                    nextTile = next.getDestination().getNumber();
-                    p.setLastTile(nextTile);
+                if(!(game.getBoard().getTile(next) instanceof EmptyTile)){
+                    Tile nt = game.getBoard().getTile(next).getDestination();
+                    if(nt.getNumber() > 0){
+                        Tile pt = game.getBoard().getTile(next);
+                        next = nt.getNumber();
+                        System.out.println("Player " + p.getPlayerIndex() + " moved on " + pt.getNumber() + " and is on a " + pt.getTileType() + " and is moving to " + nt.getNumber());
+
+                    }
                 }
+                p.setLastTile(next);
             }
         }
     }
+
     private boolean checkTile(int nextTile) {
         Tile t = game.getBoard().getTile(nextTile);
         return t.getTileType().equals(TileType.Empty);

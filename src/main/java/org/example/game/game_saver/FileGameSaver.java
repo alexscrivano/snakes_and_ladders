@@ -7,7 +7,7 @@ import java.nio.file.FileAlreadyExistsException;
 
 public class FileGameSaver implements GameSaver{
     private GameBoard gameBoard;
-    private final String path = ".\\src\\main\\java\\org\\example\\support\\savings\\";
+    private final String path = ".\\src\\main\\java\\org\\example\\game\\savings\\";
 
     @Override
     public void save(GameBoard board, String saveName) {

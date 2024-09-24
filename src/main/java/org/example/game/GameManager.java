@@ -6,9 +6,9 @@ import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
 import org.example.game.game_saver.FileGameSaver;
 import org.example.support.TileType;
-import org.example.game.turns.EndedState;
-import org.example.game.turns.MovingState;
-import org.example.game.turns.State;
+import org.example.game.turns.EndedTurnState;
+import org.example.game.turns.MovingTurnState;
+import org.example.game.turns.PlayerTurnState;
 import org.example.support.GameType;
 import org.example.support.Player;
 
@@ -22,7 +22,7 @@ public class GameManager {
     private int rows,cols,maxTiles;
     private int playersNumber;
 
-    private Map<Player, State> turns;
+    private Map<Player, PlayerTurnState> turns;
 
     public GameManager(int rows, int cols, int playersNumber, GameType gType) {
         this.rows = rows;
@@ -33,12 +33,13 @@ public class GameManager {
         this.turns = new HashMap<>();
     }
     public GameBoard getBoard(){return board;}
-    public Map<Player,State> getTurns(){return turns;}
-    public void setState(int player, State s){
+    public Map<Player, PlayerTurnState> getTurns(){return turns;}
+    public void setState(int player, PlayerTurnState s){
         for(Player p : turns.keySet()){
             if(p.getPlayerIndex() == player) turns.put(p,s);
         }
     }
+    public int getMaxTiles(){return maxTiles;}
 
     public void createGame(){
         builder.buildBoard();
@@ -62,13 +63,13 @@ public class GameManager {
 
     public void play(){ //Per semplicitá per ora sará solo autoplay
         for(int i = 0 ; i < playersNumber ; i++){
-            turns.put(new Player(i),new EndedState());
+            turns.put(new Player(i),new EndedTurnState());
         }
         boolean done = false;
         while(!done){
             for(Player p : turns.keySet()){
-                if(turns.get(p) instanceof EndedState){
-                    turns.put(p,new MovingState());
+                if(turns.get(p) instanceof EndedTurnState){
+                    turns.put(p,new MovingTurnState());
                     int t1 = p.getLastTile();
                     turns.get(p).move(this,p.getPlayerIndex());
                     int t2 = p.getLastTile();
@@ -89,10 +90,11 @@ public class GameManager {
         saver.save(board,name);
     }
 
+
     public static void main(String[] args) {
         GameManager gm = new GameManager(10,10,2,GameType.Standard);
         gm.createGame();
-        gm.save("save1");
+        //gm.save("save1");
 
         StringBuilder sb = new StringBuilder();
         int n = gm.maxTiles;

@@ -14,7 +14,7 @@ public class DiceRoll implements Command {
         this.total = dice1 + dice2;
     }
 
-    public int getTotal() {return total;}
+    public int getResult() {return total;}
     public int getDice1() {return dice1;}
     public int getDice2() {return dice2;}
 }

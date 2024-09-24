@@ -2,10 +2,11 @@ package org.example.board_components.boards;
 
 import org.example.board_components.tiles.Tile;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GameBoard {
+public class GameBoard implements Serializable {
     private Map<Integer,Tile> board;
 
     public GameBoard() {board = new HashMap<>();}

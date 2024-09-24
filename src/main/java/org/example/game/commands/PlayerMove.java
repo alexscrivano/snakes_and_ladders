@@ -33,6 +33,7 @@ public class PlayerMove implements Command {
                 boolean isEmpty = checkTile(nextTile);
                 if(!isEmpty) p.setLastTile(nextTile);
                 else{
+                    // TODO add special tiles functions
                     Tile next = game.getBoard().getTile(nextTile);
                     nextTile = next.getDestination().getNumber();
                     p.setLastTile(nextTile);

@@ -4,6 +4,7 @@ import org.example.board_components.boards.GameBoard;
 import org.example.board_components.builders.BoardBuilder;
 import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
+import org.example.game.game_saver.FileGameSaver;
 import org.example.support.TileType;
 import org.example.game.turns.EndedState;
 import org.example.game.turns.MovingState;
@@ -83,10 +84,15 @@ public class GameManager {
 
     }
 
+    public void save(String name){
+        FileGameSaver saver = new FileGameSaver();
+        saver.save(board,name);
+    }
 
     public static void main(String[] args) {
         GameManager gm = new GameManager(10,10,2,GameType.Standard);
         gm.createGame();
+        gm.save("save1");
 
         StringBuilder sb = new StringBuilder();
         int n = gm.maxTiles;

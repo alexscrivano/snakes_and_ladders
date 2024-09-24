@@ -5,6 +5,12 @@ import org.example.board_components.builders.BoardBuilder;
 import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
 import org.example.board_components.tiles.TileType;
+import org.example.game.turns.EndedState;
+import org.example.game.turns.MovingState;
+import org.example.game.turns.State;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameManager {
     private BoardBuilder builder;
@@ -13,12 +19,22 @@ public class GameManager {
     private int rows,cols,maxTiles;
     private int playersNumber;
 
+    private Map<Player, State> turns;
+
     public GameManager(int rows, int cols, int playersNumber, GameType gType) {
         this.rows = rows;
         this.cols = cols;
         this.playersNumber = playersNumber;
         this.maxTiles = rows * cols;
         if(gType == GameType.Standard) this.builder = new StdBoardBuilder();
+        this.turns = new HashMap<>();
+    }
+    public GameBoard getBoard(){return board;}
+    public Map<Player,State> getTurns(){return turns;}
+    public void setState(int player, State s){
+        for(Player p : turns.keySet()){
+            if(p.getPlayerIndex() == player) turns.put(p,s);
+        }
     }
 
     public void createGame(){
@@ -40,6 +56,31 @@ public class GameManager {
         builder.buildSnakes(maxTiles,rows,m);
         builder.buildLadders(maxTiles,rows,m);
     }
+
+    public void play(){ //Per semplicitá per ora sará solo autoplay
+        for(int i = 0 ; i < playersNumber ; i++){
+            turns.put(new Player(i),new EndedState());
+        }
+        boolean done = false;
+        while(!done){
+            for(Player p : turns.keySet()){
+                if(turns.get(p) instanceof EndedState){
+                    turns.put(p,new MovingState());
+                    int t1 = p.getLastTile();
+                    turns.get(p).move(this,p.getPlayerIndex());
+                    int t2 = p.getLastTile();
+                    System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
+                }
+                if(p.getLastTile() == 100) {
+                    done = true;
+                    System.out.println("Player "+p.getPlayerIndex()+" won!");
+                    break;
+                }
+            }
+        }
+
+    }
+
 
     public static void main(String[] args) {
         GameManager gm = new GameManager(10,10,2,GameType.Standard);
@@ -70,6 +111,10 @@ public class GameManager {
             sb.append("\n");
         }
         System.out.println(sb);
+
+        gm.play();
+
     }
+
 
 }

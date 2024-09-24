@@ -11,7 +11,9 @@ public class GameBoard {
     public GameBoard() {board = new HashMap<>();}
 
     public void addTile(Tile t){board.put(t.getNumber(),t);}
+
     public Tile getTile(int number){return board.get(number);}
+
     public Tile getTile(int row,int col){
         for(Tile t : board.values()){
             if(t.getRow() == row && t.getCol() == col){return t;}

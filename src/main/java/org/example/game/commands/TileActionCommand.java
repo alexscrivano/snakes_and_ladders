@@ -1,13 +1,13 @@
 package org.example.game.commands;
 
 import org.example.board_components.tiles.Tile;
-import org.example.board_components.tiles.special.DrawCardTile;
-import org.example.board_components.tiles.special.PriceTile;
-import org.example.board_components.tiles.special.StopTile;
+import org.example.board_components.tiles.special_tiles.DrawCardTile;
+import org.example.board_components.tiles.special_tiles.PriceTile;
+import org.example.board_components.tiles.special_tiles.StopTile;
 import org.example.game.GameManager;
-import org.example.game.commands.special_tiles.CardTileAction;
-import org.example.game.commands.special_tiles.PriceTileAction;
-import org.example.game.commands.special_tiles.StopTileAction;
+import org.example.game.commands.special_tiles_actions.CardTileAction;
+import org.example.game.commands.special_tiles_actions.PriceTileAction;
+import org.example.game.commands.special_tiles_actions.StopTileAction;
 import org.example.support.Player;
 
 public class TileActionCommand implements Command {

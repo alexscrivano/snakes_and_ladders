@@ -1,8 +1,8 @@
-package org.example.game.commands.special_tiles;
+package org.example.game.commands.special_tiles_actions;
 
 import org.example.game.GameManager;
 import org.example.game.commands.Command;
-import org.example.game.commands.standard_tiles.DiceRollCommand;
+import org.example.game.commands.base_command.DiceRollCommand;
 import org.example.support.Player;
 import org.example.support.tiles.PriceType;
 
@@ -38,14 +38,16 @@ public class PriceTileAction implements Command {
                 else newRoll = rollCommand.getDice1();
 
                 nextTile += newRoll;
-                if(nextTile > game.getMaxTiles()) nextTile = game.getMaxTiles() - (nextTile - game.getMaxTiles());
+                if(nextTile > game.getMaxTiles()) {
+                    nextTile = game.getMaxTiles() - (nextTile - game.getMaxTiles());
+                }
             }
         }
     }
 
     @Override
     public int getNextTile() {
-        return nextTile;
+        return player.getLastTile();
     }
 
 }

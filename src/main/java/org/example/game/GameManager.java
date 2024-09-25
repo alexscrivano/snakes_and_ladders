@@ -6,17 +6,15 @@ import org.example.board_components.builders.SpecialRulesBuilder;
 import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
 import org.example.game.game_saver.FileGameSaver;
-import org.example.game.turns.StoppedTurnState;
 import org.example.support.tiles.TileType;
-import org.example.game.turns.EndedTurnState;
-import org.example.game.turns.MovingTurnState;
-import org.example.game.turns.PlayerTurnState;
+import org.example.game.turns_states.EndedTurnState;
+import org.example.game.turns_states.MovingTurnState;
+import org.example.game.turns_states.PlayerTurnState;
 import org.example.support.GameType;
 import org.example.support.Player;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class GameManager {
     private BoardBuilder builder;
@@ -92,7 +90,8 @@ public class GameManager {
                 int t1 = p.getLastTile();
                 turns.get(p).move(this,p);
                 int t2 = p.getLastTile();
-                System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
+                if(t1 != t2) System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
+                else System.out.println("Player " + p.getPlayerIndex() + " still on " + t1);
 
                 if(p.getLastTile() == 100) {
                     done = true;
@@ -148,14 +147,14 @@ public class GameManager {
             if(i%2==0){
                 for(int j = 0 ; j < gm.cols ; j++){
                     Tile t = gm.board.getTile(i,j);
-                    if(t.getDestination().getNumber() > 0) sb.append("| " + t.getNumber() + " " + t.getTileType() + " " + t.getDestination().getNumber() + " |").append("\t");
+                    if(t.getTileType() == TileType.Snake || t.getTileType() == TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " " + t.getDestination().getNumber() + " |").append("\t");
                     else if(t.getTileType() != TileType.Empty && t.getTileType() != TileType.Snake && t.getTileType() != TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " |").append("\t");
                     else sb.append(t.getNumber() + "\t");
                 }
             }else{
                 for(int j = gm.cols-1; j >= 0 ; j--){
                     Tile t = gm.board.getTile(i,j);
-                    if(t.getDestination().getNumber() > 0) sb.append("| " + t.getNumber() + " " + t.getTileType() + " " + t.getDestination().getNumber() + " |").append("\t");
+                    if(t.getTileType() == TileType.Snake || t.getTileType() == TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " " + t.getDestination().getNumber() + " |").append("\t");
                     else if(t.getTileType() != TileType.Empty && t.getTileType() != TileType.Snake && t.getTileType() != TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " |").append("\t");
                     else sb.append(t.getNumber() + "\t");
                 }

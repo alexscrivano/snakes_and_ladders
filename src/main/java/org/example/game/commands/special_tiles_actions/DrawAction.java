@@ -1,16 +1,16 @@
-package org.example.game.commands.special_tiles;
+package org.example.game.commands.special_tiles_actions;
 
 import org.example.game.GameManager;
 import org.example.game.commands.Command;
 import org.example.support.Player;
 import org.example.support.tiles.Cards;
 
-public class DrawCommand implements Command {
+public class DrawAction implements Command {
     private Cards card;
     private GameManager game;
     private Player player;
 
-    public DrawCommand(Cards card, GameManager game, Player player) {
+    public DrawAction(Cards card, GameManager game, Player player) {
         this.card = card;
         this.game = game;
         this.player = player;
@@ -31,7 +31,7 @@ public class DrawCommand implements Command {
 
     @Override
     public int getNextTile() {
-        return 0;
+        return player.getLastTile();
     }
 }
 

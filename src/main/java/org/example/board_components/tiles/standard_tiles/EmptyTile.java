@@ -1,4 +1,4 @@
-package org.example.board_components.tiles.standard;
+package org.example.board_components.tiles.standard_tiles;
 
 import org.example.board_components.tiles.Tile;
 import org.example.support.tiles.TileType;

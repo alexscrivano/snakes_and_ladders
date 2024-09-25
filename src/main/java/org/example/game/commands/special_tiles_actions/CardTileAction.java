@@ -1,9 +1,9 @@
-package org.example.game.commands.special_tiles;
+package org.example.game.commands.special_tiles_actions;
 
-import org.example.board_components.tiles.Tile;
 import org.example.game.GameManager;
 import org.example.game.commands.Command;
-import org.example.game.turns.StoppedTurnState;
+import org.example.game.turns_states.EndedTurnState;
+import org.example.game.turns_states.StoppedTurnState;
 import org.example.support.Player;
 import org.example.support.tiles.Cards;
 import org.example.support.tiles.PriceType;
@@ -24,36 +24,24 @@ public class CardTileAction implements Command {
 
     @Override
     public void execute() {
-        DrawCommand command = new DrawCommand(card,game,player);
+        DrawAction command = new DrawAction(card,game,player);
         command.execute();
 
         switch (card) {
             case Panchina -> {
                 System.out.printf("Player %d drawed a %s card, stopped for 1 turn", player.getPlayerIndex(),card);
                 System.out.println();
-                int stops = 0;
-                if(player.getCard() == Cards.DivietoDiSosta) {
-                    player.setCard(null);
-                    System.out.printf("Player %d used a %s card, is not stopped anymore", player.getPlayerIndex(),Cards.DivietoDiSosta.name());
-                    System.out.println();
-                }else{
-                    stops = 1;
-                }
+                int stops = 1;
                 game.getTurns().put(player,new StoppedTurnState(stops));
             }
+
             case Locanda -> {
                 System.out.printf("Player %d drawed a %s card, stopped for 3 turns", player.getPlayerIndex(), card);
                 System.out.println();
-                int stops = 0;
-                if(player.getCard() == Cards.DivietoDiSosta) {
-                    player.setCard(null);
-                    System.out.printf("Player %d used a %s card, is not stopped anymore", player.getPlayerIndex(),Cards.DivietoDiSosta.name());
-                    System.out.println();
-                }else{
-                    stops = 3;
-                }
+                int stops = 3;
                 game.getTurns().put(player,new StoppedTurnState(stops));
             }
+
             case Molla -> {
                 System.out.printf("Player %d drawed a %s card", player.getPlayerIndex(),card);
                 System.out.println();
@@ -63,6 +51,7 @@ public class CardTileAction implements Command {
                 System.out.println();
                 action.execute();
             }
+
             case Dadi -> {
                 System.out.printf("Player %d drawed a %s card", player.getPlayerIndex(),card);
                 System.out.println();
@@ -72,16 +61,22 @@ public class CardTileAction implements Command {
                 System.out.println();
                 action.execute();
             }
+
             case DivietoDiSosta -> {
                 System.out.printf("Player %d drawed a %s card", player.getPlayerIndex(),card);
                 System.out.println();
                 player.setCard(Cards.DivietoDiSosta);
+                if(game.getTurns().get(player) instanceof StoppedTurnState){
+                    player.setCard(null);
+                    System.out.printf("Player %d used his %s card", player.getPlayerIndex(),card);
+                    game.getTurns().put(player, new EndedTurnState());
+                }
             }
         }
     }
 
     @Override
     public int getNextTile() {
-        return tile;
+        return player.getLastTile();
     }
 }

@@ -1,4 +1,4 @@
-package org.example.game.commands.standard_tiles;
+package org.example.game.commands.base_command;
 
 import org.example.game.commands.Command;
 

@@ -1,4 +1,4 @@
-package org.example.game.turns;
+package org.example.game.turns_states;
 
 import org.example.game.GameManager;
 import org.example.support.Player;

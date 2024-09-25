@@ -1,7 +1,7 @@
-package org.example.board_components.tiles.special;
+package org.example.board_components.tiles.special_tiles;
 
 import org.example.board_components.tiles.Tile;
-import org.example.board_components.tiles.standard.EmptyTile;
+import org.example.board_components.tiles.standard_tiles.EmptyTile;
 import org.example.support.tiles.Cards;
 import org.example.support.tiles.TileType;
 

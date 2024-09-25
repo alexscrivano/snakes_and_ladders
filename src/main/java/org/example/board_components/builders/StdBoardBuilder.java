@@ -2,9 +2,9 @@ package org.example.board_components.builders;
 
 import org.example.board_components.boards.GameBoard;
 import org.example.support.tiles.TileType;
-import org.example.board_components.tiles.standard.EmptyTile;
-import org.example.board_components.tiles.standard.LadderTile;
-import org.example.board_components.tiles.standard.SnakeTile;
+import org.example.board_components.tiles.standard_tiles.EmptyTile;
+import org.example.board_components.tiles.standard_tiles.LadderTile;
+import org.example.board_components.tiles.standard_tiles.SnakeTile;
 import org.example.board_components.tiles.Tile;
 
 import java.util.ArrayList;

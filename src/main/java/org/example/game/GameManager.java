@@ -15,6 +15,7 @@ import org.example.support.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class GameManager {
     private BoardBuilder builder;
@@ -86,6 +87,12 @@ public class GameManager {
         boolean done = false;
         while(!done){
             for(Player p : turns.keySet()){
+                if(p.getLastTile() == 100) {
+                    done = true;
+                    System.out.println("Player "+p.getPlayerIndex()+" won!");
+                    break;
+                }
+
                 if(turns.get(p) instanceof EndedTurnState) turns.put(p,new MovingTurnState());
                 int t1 = p.getLastTile();
                 turns.get(p).move(this,p);
@@ -93,34 +100,47 @@ public class GameManager {
                 if(t1 != t2) System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
                 else System.out.println("Player " + p.getPlayerIndex() + " still on " + t1);
 
-                if(p.getLastTile() == 100) {
+
+            }
+        }
+    }
+    public void manual(){
+        for(int i = 0 ; i < playersNumber ; i++){
+            System.out.println("Player " + i );
+            turns.put(new Player(i),new EndedTurnState());
+        }
+
+        Scanner sc = new Scanner(System.in);
+        boolean done = false;
+        while(!done){
+            for(Player p : turns.keySet()){
+                if(p.getLastTile() == 100){
                     done = true;
                     System.out.println("Player "+p.getPlayerIndex()+" won!");
                     break;
                 }
+
+                PlayerTurnState state = turns.get(p);
+                if(state instanceof EndedTurnState) turns.put(p,new MovingTurnState());
+                System.out.printf("Player %d want to continue?", p.getPlayerIndex());
+                String yn = sc.nextLine();
+                if(yn.equals("y")){
+                    turns.get(p).move(this,p);
+                }else if(yn.equals("n")){
+                    if(playersNumber > 2){
+                        turns.keySet().remove(p);
+                    }else{
+                        setWinnerNext(p.getPlayerIndex());
+                    }
+                }
             }
         }
     }
-    public void manual(GameType type){
-        for(int i = 0 ; i < playersNumber ; i++){
-            turns.put(new Player(i),new EndedTurnState());
-        }
-        boolean done = false;
-        if(type == GameType.MoreRules && diceNumber == 2){
-            while(!done){
-                for(Player p : turns.keySet()){
-                    if(p.getLastTile() == 100){
-                        done = true;
-                        System.out.println("Player "+p.getPlayerIndex()+" won!");
-                        break;
-                    }
-                    PlayerTurnState state = turns.get(p);
-                    if(state instanceof EndedTurnState) turns.put(p,new MovingTurnState());
-
-                }
-            }
-        }else{
-
+    private void setWinnerNext(int playerIndex){
+        System.out.println("Player "+playerIndex+" retired");
+        int winner = (playerIndex + 1) % playersNumber;
+        for(Player p : turns.keySet()){
+            if(p.getPlayerIndex() == winner) p.setLastTile(100);
         }
     }
 
@@ -163,7 +183,7 @@ public class GameManager {
         }
         System.out.println(sb);
 
-        gm.autoplay();
+        gm.manual();
 
     }
 

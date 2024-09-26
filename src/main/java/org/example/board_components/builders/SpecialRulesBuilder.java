@@ -44,7 +44,7 @@ public class SpecialRulesBuilder implements BoardBuilder {
         while (snakes > 0){
             int i = rand.nextInt(n-1)+1;
             Tile t = gameBoard.getTile(i);
-            if(t instanceof EmptyTile && t.getRow() < rows-1){
+            if(t instanceof EmptyTile && t.getRow() < rows-1 && !t.isOccupied()){
                 SnakeTile st = (SnakeTile) buildTile(TileType.Snake, t.getRow(),t.getCol(),t.getNumber());
                 gameBoard.addTile(st);
                 snakes--;
@@ -72,7 +72,7 @@ public class SpecialRulesBuilder implements BoardBuilder {
         while (ladders > 0){
             int i = rand.nextInt(n-1)+1;
             Tile t = gameBoard.getTile(i);
-            if(t.getTileType() == TileType.Empty && t.getRow() > 0){
+            if(t.getTileType() == TileType.Empty && t.getRow() > 0 && !t.isOccupied()){
                 LadderTile lt = (LadderTile) buildTile(TileType.Ladder, t.getRow(),t.getCol(),t.getNumber());
                 gameBoard.addTile(lt);
                 ladders--;
@@ -82,7 +82,7 @@ public class SpecialRulesBuilder implements BoardBuilder {
         for(Tile t : gameBoard.getBoard().values()){
             if(t instanceof LadderTile){
                 for(Tile tDwn : gameBoard.getBoard().values()){
-                    if(tDwn instanceof EmptyTile && tDwn.getRow() < t.getRow() && tDwn.isOccupied()) emptyTiles.add((EmptyTile) tDwn);
+                    if(tDwn instanceof EmptyTile && tDwn.getRow() < t.getRow() && !tDwn.isOccupied()) emptyTiles.add((EmptyTile) tDwn);
                 }
 
                 int x = rand.nextInt(emptyTiles.size());
@@ -106,7 +106,7 @@ public class SpecialRulesBuilder implements BoardBuilder {
         while (cards > 0){
             int tileN = rand.nextInt(n-1)+1;
             Tile t = gameBoard.getTile(tileN);
-            if(t.getTileType() == TileType.Empty && !t.isOccupied()){
+            if(t.getTileType() == TileType.Empty && !t.isOccupied() && t.getNumber() > 1){
                 gameBoard.getBoard().put(t.getNumber(),buildTile(TileType.Card,t.getRow(),t.getCol(),t.getNumber()));
                 cards--;
             }
@@ -114,7 +114,7 @@ public class SpecialRulesBuilder implements BoardBuilder {
         while (stops > 0){
             int tileN = rand.nextInt(n-1)+1;
             Tile t = gameBoard.getTile(tileN);
-            if(t.getTileType() == TileType.Empty && !t.isOccupied()){
+            if(t.getTileType() == TileType.Empty && !t.isOccupied() && t.getNumber() > 1){
                 gameBoard.getBoard().put(t.getNumber(),buildTile(TileType.Stop,t.getRow(),t.getCol(),t.getNumber()));
                 int type = rand.nextInt(2);
                 if(type == 0){
@@ -128,7 +128,7 @@ public class SpecialRulesBuilder implements BoardBuilder {
         while (prices > 0){
             int tileN = rand.nextInt(n-1)+1;
             Tile t = gameBoard.getTile(tileN);
-            if(t.getTileType() == TileType.Empty && !t.isOccupied()){
+            if(t.getTileType() == TileType.Empty && !t.isOccupied() && t.getNumber() > 1){
                 gameBoard.getBoard().put(t.getNumber(),buildTile(TileType.Price,t.getRow(),t.getCol(),t.getNumber()));
                 int price = rand.nextInt(2);
                 if(price == 0){

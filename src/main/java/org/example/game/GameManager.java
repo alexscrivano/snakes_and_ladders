@@ -39,25 +39,21 @@ public class GameManager {
         if(gType == GameType.Standard) this.builder = new StdBoardBuilder();
         else if(gType == GameType.MoreRules) this.builder = new SpecialRulesBuilder();
     }
-
+    public int getPlayersNumber(){return playersNumber;}
+    public int getRows(){return rows;}
+    public int getCols(){return cols;}
     public GameType getGameType() {return gameType;}
     public GameBoard getBoard(){return board;}
     public Map<Player, PlayerTurnState> getTurns(){return turns;}
-    /*
-    public void setState(int player, PlayerTurnState s){
-        for(Player p : turns.keySet()){
-            if(p.getPlayerIndex() == player) turns.put(p,s);
-        }
-    }
-    */
+
     public int getMaxTiles(){return maxTiles;}
     public int getDiceNumber(){return diceNumber;}
 
-    public void createGame(int type){
+    public void createGame(){
         builder.buildBoard();
         System.out.println("Board created!");
         this.board = builder.getGameBoard();
-        if(type == 0) fillTheBoardStd();
+        if(gameType == GameType.Standard) fillTheBoardStd();
         else fillTheBoard();
     }
 
@@ -152,7 +148,7 @@ public class GameManager {
 
     public static void main(String[] args) {
         GameManager gm = new GameManager(10,10,2,2,GameType.MoreRules);
-        gm.createGame(1);
+        gm.createGame();
         //gm.save("save1");
 
         StringBuilder sb = new StringBuilder();

@@ -6,7 +6,7 @@ import java.io.*;
 
 public class FileGameSaver implements GameSaver{
     private GameBoard gameBoard;
-    private final String path = ".\\src\\main\\java\\org\\example\\game\\savings\\";
+    private final String path = ".\\src\\main\\resources\\savings\\";
 
     @Override
     public void save(GameBoard board, String saveName) {

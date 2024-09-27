@@ -1,11 +1,15 @@
 package org.example.game;
 
+import org.example.application.Application;
 import org.example.board_components.boards.GameBoard;
 import org.example.board_components.builders.BoardBuilder;
 import org.example.board_components.builders.SpecialRulesBuilder;
 import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
+import org.example.game.commands.PlayerMove;
+import org.example.game.commands.base_command.DiceRollCommand;
 import org.example.game.game_saver.FileGameSaver;
+import org.example.game.turns_states.StoppedTurnState;
 import org.example.support.tiles.TileType;
 import org.example.game.turns_states.EndedTurnState;
 import org.example.game.turns_states.MovingTurnState;
@@ -13,11 +17,20 @@ import org.example.game.turns_states.PlayerTurnState;
 import org.example.support.GameType;
 import org.example.support.Player;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class GameManager {
+
+    private record GameConfiguration (
+            GameBoard gBoard,
+            GameType gameType
+    )implements Serializable {}
+    private final String path = ".\\src\\main\\resources\\savings\\";
+
+    private Application app;
+
     private BoardBuilder builder;
     private GameBoard board;
     private GameType gameType;
@@ -27,7 +40,7 @@ public class GameManager {
 
     private Map<Player, PlayerTurnState> turns;
 
-    public GameManager(int rows, int cols, int playersNumber, int diceNumber, GameType gType) {
+    public GameManager(int rows, int cols, int playersNumber, int diceNumber, GameType gType, Application app) {
         this.rows = rows;
         this.cols = cols;
         this.playersNumber = playersNumber;
@@ -35,10 +48,28 @@ public class GameManager {
         this.diceNumber = diceNumber;
         this.gameType = gType;
         this.turns = new HashMap<>();
+        this.app = app;
 
         if(gType == GameType.Standard) this.builder = new StdBoardBuilder();
         else if(gType == GameType.MoreRules) this.builder = new SpecialRulesBuilder();
     }
+
+    public GameManager(GameBoard board, GameType gType) {
+        this.board = board;
+        this.turns = new HashMap<>();
+
+        if(gType == GameType.Standard) this.builder = new StdBoardBuilder();
+        else if(gType == GameType.MoreRules) this.builder = new SpecialRulesBuilder();
+    }
+
+    public void setPlayersNumber(int playersNumber) {this.playersNumber = playersNumber;}
+    public void setRows(int rows) {this.rows = rows;}
+    public void setCols(int cols) {this.cols = cols;}
+    public void setDiceNumber(int diceNumber) {this.diceNumber = diceNumber;}
+    public void setBoard(GameBoard board){this.board = board;}
+    public void setBuilder(BoardBuilder builder){this.builder = builder;}
+    public void setGameType(GameType type){this.gameType = type;}
+
     public int getPlayersNumber(){return playersNumber;}
     public int getRows(){return rows;}
     public int getCols(){return cols;}
@@ -76,31 +107,51 @@ public class GameManager {
         builder.buildLadders(maxTiles,rows,m);
     }
 
-    public void autoplay(){
-        for(int i = 0 ; i < playersNumber ; i++){
-            turns.put(new Player(i),new EndedTurnState());
+    public void autoplay() {
+        for (int i = 0; i < playersNumber; i++) {
+            turns.put(new Player(i), new EndedTurnState());
         }
         boolean done = false;
-        while(!done){
-            for(Player p : turns.keySet()){
-                if(p.getLastTile() == 100) {
+        while (!done) {
+            for (Player p : turns.keySet()) {
+                if (turns.get(p) instanceof EndedTurnState) turns.put(p, new MovingTurnState());
+                int t1 = p.getLastTile();
+                turns.get(p).move(this, p, new DiceRollCommand());
+                int t2 = p.getLastTile();
+
+                if (t1 < t2) {
+                    System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
+                    app.setMsg(" moved from " + t1 + " to " + t2);
+                }else {
+                    if(turns.get(p) instanceof StoppedTurnState){
+                        System.out.println("Player " + p.getPlayerIndex() + " still on " + t2);
+                        app.setMsg(" stopped for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
+                    }
+                    else {
+
+                        System.out.println("Player " + p.getPlayerIndex() + " come back to " + t2);
+                        app.setMsg(" come back to " + t2);
+                    }
+                }
+
+                if (p.getLastTile() == 100) {
                     done = true;
-                    System.out.println("Player "+p.getPlayerIndex()+" won!");
+                    System.out.println("Player " + p.getPlayerIndex() + " won!");
+                    app.setMsg(" moved from " + t1 + " to " + t2);
+                    app.setPlayer(p);
+                    app.update();
                     break;
                 }
 
-                if(turns.get(p) instanceof EndedTurnState) turns.put(p,new MovingTurnState());
-                int t1 = p.getLastTile();
-                turns.get(p).move(this,p);
-                int t2 = p.getLastTile();
-                if(t1 != t2) System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
-                else System.out.println("Player " + p.getPlayerIndex() + " still on " + t1);
-
+                app.setPlayer(p);
+                app.update();
 
             }
         }
     }
+
     public void manual(){
+        /*
         for(int i = 0 ; i < playersNumber ; i++){
             System.out.println("Player " + i );
             turns.put(new Player(i),new EndedTurnState());
@@ -119,9 +170,10 @@ public class GameManager {
                 PlayerTurnState state = turns.get(p);
                 if(state instanceof EndedTurnState) turns.put(p,new MovingTurnState());
                 System.out.printf("Player %d want to continue?", p.getPlayerIndex());
-                String yn = sc.nextLine();
+                String yn = app.getCommand();
                 if(yn.equals("y")){
-                    turns.get(p).move(this,p);
+                    app.setLastTile(p.getLastTile());
+                    turns.get(p).move(this,p, new DiceRollCommand());
                 }else if(yn.equals("n")){
                     if(playersNumber > 2){
                         turns.keySet().remove(p);
@@ -129,8 +181,14 @@ public class GameManager {
                         setWinnerNext(p.getPlayerIndex());
                     }
                 }
+
+                app.setPlayer(p.getPlayerIndex());
+                app.setNewTile(p.getLastTile());
+
             }
         }
+
+         */
     }
     private void setWinnerNext(int playerIndex){
         System.out.println("Player "+playerIndex+" retired");
@@ -141,47 +199,26 @@ public class GameManager {
     }
 
     public void save(String name){
-        FileGameSaver saver = new FileGameSaver();
-        saver.save(board,name);
-    }
-
-
-    public static void main(String[] args) {
-        GameManager gm = new GameManager(10,10,2,2,GameType.MoreRules);
-        gm.createGame();
-        //gm.save("save1");
-
-        StringBuilder sb = new StringBuilder();
-        int n = gm.maxTiles;
-        Tile[][] table = new Tile[gm.rows][gm.cols];
-        while(n > 0){
-            Tile t = gm.board.getTile(n);
-            table[t.getRow()][t.getCol()] = t;
-            n--;
-        }
-        for(int i = 0 ; i < gm.rows ; i++){
-            if(i%2==0){
-                for(int j = 0 ; j < gm.cols ; j++){
-                    Tile t = gm.board.getTile(i,j);
-                    if(t.getTileType() == TileType.Snake || t.getTileType() == TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " " + t.getDestination().getNumber() + " |").append("\t");
-                    else if(t.getTileType() != TileType.Empty && t.getTileType() != TileType.Snake && t.getTileType() != TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " |").append("\t");
-                    else sb.append(t.getNumber() + "\t");
-                }
-            }else{
-                for(int j = gm.cols-1; j >= 0 ; j--){
-                    Tile t = gm.board.getTile(i,j);
-                    if(t.getTileType() == TileType.Snake || t.getTileType() == TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " " + t.getDestination().getNumber() + " |").append("\t");
-                    else if(t.getTileType() != TileType.Empty && t.getTileType() != TileType.Snake && t.getTileType() != TileType.Ladder) sb.append("| " + t.getNumber() + " " + t.getTileType() + " |").append("\t");
-                    else sb.append(t.getNumber() + "\t");
-                }
+        try{
+            File f = new File(path+name);
+            if(!f.exists()){
+                f.createNewFile();
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+                oos.writeObject(new GameConfiguration(this.board,this.gameType));
+                oos.flush();
+                oos.close();
             }
-            sb.append("\n");
-        }
-        System.out.println(sb);
-
-        gm.manual();
-
+        }catch (IOException e){e.printStackTrace();}
     }
 
-
+    public void load(String filename){
+        try{
+            File f = new File(path + filename);
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+            GameConfiguration config = (GameConfiguration) ois.readObject();
+            this.setBoard(config.gBoard);
+            this.setGameType(config.gameType);
+            ois.close();
+        }catch (IOException | ClassNotFoundException e) {}
+    }
 }

@@ -134,7 +134,7 @@ public class GameManager {
                     }
                 }
 
-                if (p.getLastTile() == 100) {
+                if (p.getLastTile() == maxTiles) {
                     done = true;
                     System.out.println("Player " + p.getPlayerIndex() + " won!");
                     app.setMsg(" moved from " + t1 + " to " + t2);

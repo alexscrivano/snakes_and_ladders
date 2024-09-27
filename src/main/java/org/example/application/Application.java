@@ -46,7 +46,7 @@ public class Application extends JFrame {
         turnsPanel.revalidate();
         turnsPanel.repaint();
 
-        if(player.getLastTile() == 100) {
+        if(player.getLastTile() == gm.getMaxTiles()) {
             JOptionPane.showMessageDialog(this,"Player " + player.getPlayerIndex() + " won!");
             gm = null;
             player = null;
@@ -70,7 +70,10 @@ public class Application extends JFrame {
 
     private void initUi() {
 
-        JFrame frame = new JFrame("Game configuration");
+        int rows = Integer.parseInt(JOptionPane.showInputDialog("Enter number of rows in table"));
+        int cols = Integer.parseInt(JOptionPane.showInputDialog("Enter number of columns in table"));
+        int diceNumber = Integer.parseInt(JOptionPane.showInputDialog("Enter number of dice"));
+        int players = Integer.parseInt(JOptionPane.showInputDialog("Enter number of players"));
 
         setLayout(new BorderLayout());
 
@@ -96,7 +99,7 @@ public class Application extends JFrame {
         btnNewGame.addActionListener(e -> {
             String message;
             if(gm == null){
-                gm = new GameManager(10,10,2,2, GameType.Standard, this);
+                gm = new GameManager(rows,cols,players,diceNumber, GameType.Standard, this);
                 gm.createGame();
                 message = "New game table Created: \n";
 
@@ -113,7 +116,7 @@ public class Application extends JFrame {
         btnNewGame1 = new JButton("New Special Game");
         btnNewGame1.addActionListener(e -> {
             if(gm == null){
-                gm = new GameManager(10,10,2,2, GameType.MoreRules,  this);
+                gm = new GameManager(rows,cols,players,diceNumber, GameType.MoreRules,  this);
                 gm.createGame();
 
                 String message = "New game table Created: \n";

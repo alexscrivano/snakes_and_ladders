@@ -38,7 +38,7 @@ public class StdBoardBuilder implements BoardBuilder { // Build the game board w
         while (snakes > 0){
             int i = rand.nextInt(n-1)+1;
             Tile t = board.getTile(i);
-            if(t instanceof EmptyTile && t.getRow() < rows-1){
+            if(t instanceof EmptyTile && t.getRow() < rows-1 && !t.isOccupied()){
                 SnakeTile st = (SnakeTile) buildTile(TileType.Snake, t.getRow(),t.getCol(),t.getNumber());
                 board.addTile(st);
                 snakes--;
@@ -67,7 +67,7 @@ public class StdBoardBuilder implements BoardBuilder { // Build the game board w
         while (ladders > 0){
             int i = rand.nextInt(n-1)+1;
             Tile t = board.getTile(i);
-            if(t.getTileType() == TileType.Empty && t.getRow() > 0){
+            if(t instanceof EmptyTile && t.getRow() > 0 && !t.isOccupied()){
                 LadderTile lt = (LadderTile) buildTile(TileType.Ladder, t.getRow(),t.getCol(),t.getNumber());
                 board.addTile(lt);
                 ladders--;
@@ -77,7 +77,7 @@ public class StdBoardBuilder implements BoardBuilder { // Build the game board w
         for(Tile t : board.getBoard().values()){
             if(t instanceof LadderTile){
                 for(Tile tDwn : board.getBoard().values()){
-                    if(tDwn instanceof EmptyTile && tDwn.getRow() < t.getRow() && tDwn.isOccupied()) emptyTiles.add((EmptyTile) tDwn);
+                    if(tDwn instanceof EmptyTile && tDwn.getRow() < t.getRow() && !tDwn.isOccupied()) emptyTiles.add((EmptyTile) tDwn);
                 }
 
                 int x = rand.nextInt(emptyTiles.size());

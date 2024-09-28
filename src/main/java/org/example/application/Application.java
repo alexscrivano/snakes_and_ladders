@@ -1,46 +1,43 @@
 package org.example.application;
 
+import org.example.board_components.builders.SpecialRulesBuilder;
+import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
 import org.example.game.GameManager;
-import org.example.game.turns_states.StoppedTurnState;
+import org.example.game.turns_states.EndedTurnState;
 import org.example.support.GameType;
 import org.example.support.Player;
 import org.example.support.tiles.TileType;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.util.HashMap;
 
 public class Application extends JFrame {
     private GameManager gm;
     private Player player;
     private String msg;
+    private int t1,t2;
 
-    JLayeredPane layeredPane;
+    JPanel table;
     JPanel turnsPanel;
     JScrollPane turnsScrollPane;
     JPanel btnPanel;
     JButton resetbtn;
-    JButton btnNewGame, btnNewGame1, startGame;
-    JCheckBox cb;
-
-    final JPanel[] tablePanel = new JPanel[1];
-    final JPanel[] tablePanel1 = new JPanel[1];
+    int[] i = new int[1];
 
     public Application() {
         setTitle("Snakes and Ladders");
-        setSize(1000,1000);
+        setSize(1500,1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(true);
-
         initUi();
         pack();
         setVisible(true);
     }
 
     public void update(){
-        // TODO modify the interface state and repaint
-
         JLabel label = new JLabel("P" + player.getPlayerIndex() + ">>" + msg);
         turnsPanel.add(label);
         turnsPanel.revalidate();
@@ -67,149 +64,286 @@ public class Application extends JFrame {
     public void setMsg(String msg){this.msg = msg;}
     public Player getPlayer() {return this.player;}
     public void setPlayer(Player player) {this.player = player;}
+    public void setT1(int t1) {this.t1 = t1;}
+    public void setT2(int t2) {this.t2 = t2;}
 
-    private void initUi() {
+    private void setPanels(JPanel panel, JPanel btns, JFrame parent){
+        int[] dice = {-1};
+        GameType[] type = new GameType[1];
 
-        int rows = Integer.parseInt(JOptionPane.showInputDialog("Enter number of rows in table"));
-        int cols = Integer.parseInt(JOptionPane.showInputDialog("Enter number of columns in table"));
-        int diceNumber = Integer.parseInt(JOptionPane.showInputDialog("Enter number of dice"));
-        int players = Integer.parseInt(JOptionPane.showInputDialog("Enter number of players"));
+        JPanel players = new JPanel();
+        JPanel diceNumber = new JPanel();
+        JPanel gameType = new JPanel();
+        JPanel rows = new JPanel();
+        JPanel cols = new JPanel();
 
-        setLayout(new BorderLayout());
+        JLabel playersL = new JLabel("Select players number: ");
+        JLabel diceNumberL = new JLabel("Select dice number: ");
+        JLabel gameTypeL = new JLabel("Select game type: ");
+        JLabel rowsL = new JLabel("Select rows for game table: ");
+        JLabel colsL = new JLabel("Select cols for game table: ");
 
-        layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(800, 800));
+        JButton incr = new JButton("+");
+        JButton decr = new JButton("-");
+        JButton incr1 = new JButton("+");
+        JButton decr1 = new JButton("-");
+        JButton incr2 = new JButton("+");
+        JButton decr2 = new JButton("-");
+        JCheckBox check1 = new JCheckBox();
+        JCheckBox check2 = new JCheckBox();// setText 1 o 2
+        JCheckBox type1 = new JCheckBox();
+        JCheckBox type2 = new JCheckBox();// setText special o standard
+        JTextField playersT = new JTextField(2);
+        JTextField dimTR = new JTextField(2);
+        JTextField dimTC = new JTextField(2);
 
-        turnsPanel =  new JPanel();
-        turnsPanel.setLayout(new BoxLayout(turnsPanel, BoxLayout.Y_AXIS));
+        playersT.setText(""+2);
+        dimTR.setText(""+10);
+        dimTC.setText(""+10);
 
-        turnsScrollPane = new JScrollPane(turnsPanel);
-        turnsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        turnsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        turnsScrollPane.setPreferredSize(new Dimension(500, 800));
-        turnsScrollPane.setBounds(1050,0,500,800);
+        players.setLayout(new GridLayout(1,3));
+        rows.setLayout(new GridLayout(1,3));
+        cols.setLayout(new GridLayout(1,3));
+        diceNumber.setLayout(new GridLayout(1,2));
+        gameType.setLayout(new GridLayout(1,2));
 
-        btnPanel = new JPanel();
-        btnPanel.setLayout(new FlowLayout());
-        btnPanel.setPreferredSize(new Dimension(800, 50));
-        btnPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
-        btnPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        incr.setPreferredSize(new Dimension(50,50));
+        decr.setPreferredSize(new Dimension(50,50));
+        incr1.setPreferredSize(new Dimension(50,50));
+        decr1.setPreferredSize(new Dimension(50,50));
+        incr2.setPreferredSize(new Dimension(50,50));
+        decr2.setPreferredSize(new Dimension(50,50));
 
-        btnNewGame = new JButton("New Standard Game");
-        btnNewGame.addActionListener(e -> {
-            String message;
-            if(gm == null){
-                gm = new GameManager(rows,cols,players,diceNumber, GameType.Standard, this);
-                gm.createGame();
-                message = "New game table Created: \n";
-
-                tablePanel[0] = createTable();
-                tablePanel[0].setBounds(0,0,800,800);
-
-                if(tablePanel1[0] == null){
-                    layeredPane.add(tablePanel[0], JLayeredPane.DEFAULT_LAYER);
-                    JOptionPane.showMessageDialog(this, message);
-                }
-            }
+        incr.addActionListener(e -> {
+                int num = Integer.parseInt(playersT.getText());
+                num += 1;
+                playersT.setText(""+num);
+        });
+        decr.addActionListener(e -> {
+                int num = Integer.parseInt(playersT.getText());
+                num -= 1;
+                playersT.setText(""+num);
+        });
+        incr1.addActionListener(e -> {
+                int num = Integer.parseInt(dimTR.getText());
+                num += 1;
+                dimTR.setText(""+num);
+        });
+        decr1.addActionListener(e -> {
+                int num = Integer.parseInt(dimTR.getText());
+                num -= 1;
+                dimTR.setText(""+num);
+        });
+        incr2.addActionListener(e -> {
+                int num = Integer.parseInt(dimTC.getText());
+                num += 1;
+                dimTC.setText(""+num);
+        });
+        decr2.addActionListener(e -> {
+                int num = Integer.parseInt(dimTC.getText());
+                num -= 1;
+                dimTC.setText(""+num);
         });
 
-        btnNewGame1 = new JButton("New Special Game");
-        btnNewGame1.addActionListener(e -> {
-            if(gm == null){
-                gm = new GameManager(rows,cols,players,diceNumber, GameType.MoreRules,  this);
-                gm.createGame();
-
-                String message = "New game table Created: \n";
-                tablePanel1[0] = createTable();
-                tablePanel1[0].setBounds(0,0,800,800);
-                if(tablePanel[0] == null){
-                    layeredPane.add(tablePanel1[0], JLayeredPane.DEFAULT_LAYER);
-                    JOptionPane.showMessageDialog(this, message);
-                }
-            }
-
+        type1.addActionListener(e -> {
+            if(type1.isSelected() && !type2.isSelected()) type[0] = GameType.Standard;
+            else if(type1.isSelected() && type2.isSelected()) JOptionPane.showMessageDialog(this, "You have to choose only one game type");
+        });
+        type2.addActionListener(e -> {
+            if(!type1.isSelected() && type2.isSelected()) type[0] = GameType.MoreRules;
+            else if(type1.isSelected() && type2.isSelected()) JOptionPane.showMessageDialog(this, "You have to choose only one game type");
+        });
+        check1.addActionListener(e -> {
+            if(check1.isSelected() && check2.isSelected()) JOptionPane.showMessageDialog(this, "You have to choose only one number");
+            else if(check1.isSelected() && !check2.isSelected()) dice[0] = 1;
+        });
+        check2.addActionListener(e -> {
+            if(check1.isSelected() && check2.isSelected()) JOptionPane.showMessageDialog(this, "You have to choose only one number");
+            else if(!check1.isSelected() && check2.isSelected()) dice[0] = 2;
         });
 
+        rows.add(rowsL); rows.add(decr1); rows.add(dimTR); rows.add(incr1);
+        cols.add(colsL); cols.add(decr2); cols.add(dimTC); cols.add(incr2);
+        players.add(playersL); players.add(decr); players.add(playersT); players.add(incr);
 
+        diceNumber.add(diceNumberL); check1.setText("1"); diceNumber.add(check1); check2.setText("2"); diceNumber.add(check2);
+        gameType.add(gameTypeL); type1.setText("standard rules"); gameType.add(type1); type2.setText("special rules"); gameType.add(type2);
 
-        final int[] simType = new int[1];
-        cb = new JCheckBox("Manual advancement");
-        cb.addActionListener(e -> {
-            if(cb.isSelected()) {
-                simType[0] = 1;
+        panel.add(players);
+        panel.add(diceNumber);
+        panel.add(gameType);
+        panel.add(rows);
+        panel.add(cols);
+
+        JButton next = new JButton("Next");
+        JButton cancel = new JButton("Cancel");
+        JButton loadConfig = new JButton("Load");
+
+        next.addActionListener(e -> {
+            int playersN = Integer.parseInt(playersT.getText());
+            int diceN = dice[0];
+            GameType gameTypeS = type[0];
+            int rowsN = Integer.parseInt(dimTR.getText());
+            int colsN = Integer.parseInt(dimTC.getText());
+
+            if(gameTypeS == null || diceN < 0){
+                JOptionPane.showMessageDialog(this, "Please choose dice number and game type");
             }else{
-                simType[0] = 0;
+                this.gm = new GameManager(rowsN,colsN,playersN,diceN,gameTypeS, this);
+                this.gm.createGame();
+                parent.dispose();
+                visualizeGame(rowsN,colsN);
             }
+
+
+            // TODO visualizeTable() to show the game board;
+        });
+        cancel.addActionListener(e -> System.exit(0));
+        loadConfig.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog("Insert config name: ");
+            this.gm = new GameManager();
+            this.gm.load(name);
+
+            int playersN = Integer.parseInt(playersT.getText());
+            int diceN = dice[0];
+            int rowsN = Integer.parseInt(dimTR.getText());
+            int colsN = Integer.parseInt(dimTC.getText());
+            GameType gameTypeS = type[0];
+
+            this.gm.setRows(rowsN);
+            this.gm.setCols(colsN);
+            this.gm.setDiceNumber(diceN);
+            this.gm.setPlayersNumber(playersN);
+            if(gameTypeS == GameType.Standard) this.gm.setBuilder(new StdBoardBuilder());
+            else if(gameTypeS == GameType.MoreRules) this.gm.setBuilder(new SpecialRulesBuilder());
+            this.gm.setTurns(new HashMap<>());
+            this.gm.createGame();
+            // TODO visualizeTable() to show the game board;
+            visualizeGame(rowsN,colsN);
+            parent.dispose();
         });
 
-        startGame = new JButton("Start simulation");
-        startGame.addActionListener(e -> {
-            if(turnsPanel != null){
-                if(turnsPanel.getComponentCount() > 0) {
-                    turnsPanel.removeAll();
-                    turnsPanel.revalidate();
-                    turnsPanel.repaint();
-                }
-            }
-
-            if(simType[0] == 0) {
-                gm.autoplay();
-            }else {
-                JButton goOn = new JButton("Roll");
-                goOn.addActionListener(action -> {
-                    if(gm != null) {gm.manual();}
-                });
-                btnPanel.add(goOn);
-                btnPanel.revalidate();
-                btnPanel.repaint();
-            }
-        });
-        btnPanel.add(btnNewGame);
-        btnPanel.add(btnNewGame1);
-        btnPanel.add(startGame);
-
-        btnPanel.add(cb);
-        layeredPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,50));
-        layeredPane.revalidate();
-        layeredPane.repaint();
-        add(btnPanel, BorderLayout.SOUTH);
-        add(layeredPane, BorderLayout.WEST);
-        add(turnsScrollPane, BorderLayout.EAST);
-
+        btns.add(cancel); btns.add(next); btns.add(loadConfig);
     }
 
-    private JPanel createTable() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(gm.getRows(),gm.getCols()));
+    private void visualizeGame(int rows, int cols){
+        setLayout(new BorderLayout());
+        setPreferredSize(new Dimension(1500,1000));
+        table = new JPanel(new GridLayout(rows,cols));
+
+        table.setPreferredSize(new Dimension(1200,1000));
+        table.setBounds(0,0,1200,1000);
+
         String content = "";
-        for (int i = 0; i < gm.getRows(); i++) {
-            if(i%2 == 0){
-                for (int j = 0; j < gm.getCols(); j++) {
+        for(int i = 0; i < rows; i++){
+            if(i % 2 == 0){
+                for(int j = 0; j < cols; j++){
                     Tile t = gm.getBoard().getTile(i,j);
-                    if(t.getTileType() == TileType.Empty) content = "" + t.getNumber();
-                    else{
-                        if(t.getDestination().getNumber() > 0) content = t.getNumber() + " - " + t.getTileType();
-                        else content = t.getNumber() + " - " + t.getTileType();
+                    content = t.getNumber() + ", " + t.getTileType();
+                    if(t.getTileType() == TileType.Snake || t.getTileType() == TileType.Ladder){
+                        content += " -> " + t.getDestination().getNumber();
                     }
-                    JLabel tile = new JLabel(content,SwingConstants.CENTER);
-                    tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                    panel.add(tile);
+                    JLabel tileLabel = new JLabel(content);
+                    tileLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                    table.add(tileLabel);
                 }
             }else{
-                for (int j = gm.getCols()-1; j >=0; j--) {
+                for(int j = cols-1; j >=0; j--){
                     Tile t = gm.getBoard().getTile(i,j);
-                    if(t.getTileType() == TileType.Empty) content = "" + t.getNumber();
-                    else{
-                        if(t.getDestination().getNumber() > 0) content = t.getNumber() + " - " + t.getTileType();
-                        else content = t.getNumber() + " - " + t.getTileType();
+                    content = t.getNumber() + ", " + t.getTileType();
+                    if(t.getTileType() == TileType.Snake || t.getTileType() == TileType.Ladder){
+                        content += " -> " + t.getDestination().getNumber();
                     }
-                    JLabel tile = new JLabel(content,SwingConstants.CENTER);
-                    tile.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                    panel.add(tile);
+                    JLabel tileLabel = new JLabel(content);
+                    tileLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                    table.add(tileLabel);
                 }
             }
         }
-        return panel;
+        this.add(table, BorderLayout.WEST);
+        revalidate();
+        repaint();
+
+        turnsPanel = new JPanel();
+        turnsPanel.setLayout(new BoxLayout(turnsPanel, BoxLayout.Y_AXIS));
+        turnsScrollPane = new JScrollPane(turnsPanel);
+
+        turnsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        turnsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        turnsScrollPane.setPreferredSize(new Dimension(250, 800));
+        turnsScrollPane.setBounds(1250,0,250,800);
+        turnsScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        this.add(turnsScrollPane, BorderLayout.EAST);
+        revalidate();
+        repaint();
+
+        btnPanel = new JPanel();
+        btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.X_AXIS));
+        btnPanel.setPreferredSize(new Dimension(1500,100));
+        btnPanel.setBounds(0,0,1500,100);
+        btnPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        JButton start = new JButton("Start simulation");
+        JCheckBox simType = new JCheckBox("Manual advancement");
+        JButton roll = new JButton("Roll");
+
+        start.addActionListener(e -> {
+            if(simType.isSelected()) {
+
+                for (int i = 0; i < gm.getPlayersNumber(); i++) {
+                    gm.getTurns().put(new Player(i), new EndedTurnState());
+                }
+                btnPanel.add(roll);
+                btnPanel.revalidate();
+                btnPanel.repaint();
+                JOptionPane.showMessageDialog(this, "Press roll to play");
+            }
+            else gm.autoplay();
+        });
+        roll.addActionListener(e -> {
+            i[0] += 1;
+            int indx = (i[0]) % gm.getPlayersNumber();
+            System.out.println(indx);
+            gm.manual(indx);
+        });
+
+        btnPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnPanel.setAlignmentY(CENTER_ALIGNMENT);
+        btnPanel.add(start);
+        btnPanel.add(simType);
+        this.add(btnPanel, BorderLayout.SOUTH);
+        revalidate();
+        repaint();
+        pack();
+        setVisible(true);
+    }
+
+    private void initUi() {
+        JFrame frame = new JFrame("Snakes and Ladders - game setup");
+        JPanel pframe = new JPanel();
+
+        JPanel settingsPanel = new JPanel();
+        JPanel buttonsPanel = new JPanel();
+
+        frame.setLayout(new BorderLayout());
+        pframe.setLayout(new GridLayout(2,1));
+        settingsPanel.setLayout(new GridLayout(5,1));
+        buttonsPanel.setLayout(new GridLayout(1,3));
+
+        frame.setPreferredSize(new Dimension(600,250));
+        settingsPanel.setPreferredSize(new Dimension(600,230));
+        buttonsPanel.setPreferredSize(new Dimension(600,20));
+
+        setPanels(settingsPanel, buttonsPanel, frame);
+        pframe.add(settingsPanel, BorderLayout.NORTH);
+        pframe.add(buttonsPanel, BorderLayout.SOUTH);
+
+        frame.add(pframe);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     public static void main(String[] args) {

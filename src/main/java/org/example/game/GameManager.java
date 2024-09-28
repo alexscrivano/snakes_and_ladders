@@ -8,7 +8,6 @@ import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
 import org.example.game.commands.PlayerMove;
 import org.example.game.commands.base_command.DiceRollCommand;
-import org.example.game.game_saver.FileGameSaver;
 import org.example.game.turns_states.StoppedTurnState;
 import org.example.support.tiles.TileType;
 import org.example.game.turns_states.EndedTurnState;
@@ -20,6 +19,7 @@ import org.example.support.Player;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class GameManager {
 
@@ -54,13 +54,7 @@ public class GameManager {
         else if(gType == GameType.MoreRules) this.builder = new SpecialRulesBuilder();
     }
 
-    public GameManager(GameBoard board, GameType gType) {
-        this.board = board;
-        this.turns = new HashMap<>();
-
-        if(gType == GameType.Standard) this.builder = new StdBoardBuilder();
-        else if(gType == GameType.MoreRules) this.builder = new SpecialRulesBuilder();
-    }
+    public GameManager() {}
 
     public void setPlayersNumber(int playersNumber) {this.playersNumber = playersNumber;}
     public void setRows(int rows) {this.rows = rows;}
@@ -69,6 +63,7 @@ public class GameManager {
     public void setBoard(GameBoard board){this.board = board;}
     public void setBuilder(BoardBuilder builder){this.builder = builder;}
     public void setGameType(GameType type){this.gameType = type;}
+    public void setTurns(Map<Player, PlayerTurnState> turns){this.turns = turns;}
 
     public int getPlayersNumber(){return playersNumber;}
     public int getRows(){return rows;}
@@ -128,7 +123,6 @@ public class GameManager {
                         app.setMsg(" stopped for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
                     }
                     else {
-
                         System.out.println("Player " + p.getPlayerIndex() + " come back to " + t2);
                         app.setMsg(" come back to " + t2);
                     }
@@ -142,60 +136,47 @@ public class GameManager {
                     app.update();
                     break;
                 }
-
+                app.setT1(t1);
+                app.setT2(t2);
                 app.setPlayer(p);
                 app.update();
-
             }
+
         }
     }
 
-    public void manual(){
-        /*
-        for(int i = 0 ; i < playersNumber ; i++){
-            System.out.println("Player " + i );
-            turns.put(new Player(i),new EndedTurnState());
-        }
+    public void manual(int playerInd){
+        for(Player p : turns.keySet()){
+            if(p.getPlayerIndex() == playerInd){
+                if (turns.get(p) instanceof EndedTurnState) turns.put(p, new MovingTurnState());
+                int t1 = p.getLastTile();
+                turns.get(p).move(this, p, new DiceRollCommand());
+                int t2 = p.getLastTile();
 
-        Scanner sc = new Scanner(System.in);
-        boolean done = false;
-        while(!done){
-            for(Player p : turns.keySet()){
-                if(p.getLastTile() == 100){
-                    done = true;
-                    System.out.println("Player "+p.getPlayerIndex()+" won!");
-                    break;
-                }
-
-                PlayerTurnState state = turns.get(p);
-                if(state instanceof EndedTurnState) turns.put(p,new MovingTurnState());
-                System.out.printf("Player %d want to continue?", p.getPlayerIndex());
-                String yn = app.getCommand();
-                if(yn.equals("y")){
-                    app.setLastTile(p.getLastTile());
-                    turns.get(p).move(this,p, new DiceRollCommand());
-                }else if(yn.equals("n")){
-                    if(playersNumber > 2){
-                        turns.keySet().remove(p);
+                if (t1 < t2) {
+                    System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
+                    app.setMsg(" moved from " + t1 + " to " + t2);
+                }else{
+                    if(turns.get(p) instanceof StoppedTurnState){
+                        System.out.println("Player " + p.getPlayerIndex() + " stopped on " + t2 + "for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
+                        app.setMsg(" stopped on " + t2 + " for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
                     }else{
-                        setWinnerNext(p.getPlayerIndex());
+                        System.out.println("Player " + p.getPlayerIndex() + " come back to " + t2);
+                        app.setMsg(" come back to " + t2);
                     }
                 }
+                if (p.getLastTile() == maxTiles) {
+                    System.out.println("Player " + p.getPlayerIndex() + " won!");
+                    app.setMsg(" moved from " + t1 + " to " + t2);
+                }
 
-                app.setPlayer(p.getPlayerIndex());
-                app.setNewTile(p.getLastTile());
-
+                app.setT1(t1);
+                app.setT2(t2);
+                app.setPlayer(p);
+                app.update();
             }
         }
 
-         */
-    }
-    private void setWinnerNext(int playerIndex){
-        System.out.println("Player "+playerIndex+" retired");
-        int winner = (playerIndex + 1) % playersNumber;
-        for(Player p : turns.keySet()){
-            if(p.getPlayerIndex() == winner) p.setLastTile(100);
-        }
     }
 
     public void save(String name){

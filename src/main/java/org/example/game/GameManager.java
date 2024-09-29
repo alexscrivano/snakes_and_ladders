@@ -25,7 +25,8 @@ public class GameManager {
 
     private record GameConfiguration (
             GameBoard gBoard,
-            GameType gameType
+            GameType gameType,
+            Map<Player,PlayerTurnState> gturns
     )implements Serializable {}
     private final String path = ".\\src\\main\\resources\\savings\\";
 
@@ -60,10 +61,18 @@ public class GameManager {
     public void setRows(int rows) {this.rows = rows;}
     public void setCols(int cols) {this.cols = cols;}
     public void setDiceNumber(int diceNumber) {this.diceNumber = diceNumber;}
-    public void setBoard(GameBoard board){this.board = board;}
+    public void setBoard(GameBoard board){
+        this.board = new GameBoard();
+        for(Tile t : board.getBoard().values()) {
+            System.out.println(t.getNumber());
+            this.board.addTile(t);
+        }
+    }
+    public void setTurns(Map<Player, PlayerTurnState> turns){this.turns = turns;}
     public void setBuilder(BoardBuilder builder){this.builder = builder;}
     public void setGameType(GameType type){this.gameType = type;}
-    public void setTurns(Map<Player, PlayerTurnState> turns){this.turns = turns;}
+    public void setApp(Application app){this.app = app;}
+    public void setMaxTiles(int maxTiles) {this.maxTiles = maxTiles;}
 
     public int getPlayersNumber(){return playersNumber;}
     public int getRows(){return rows;}
@@ -78,9 +87,11 @@ public class GameManager {
     public void createGame(){
         builder.buildBoard();
         System.out.println("Board created!");
-        this.board = builder.getGameBoard();
-        if(gameType == GameType.Standard) fillTheBoardStd();
-        else fillTheBoard();
+        if(board == null) {
+            this.board = builder.getGameBoard();
+            if(gameType == GameType.Standard) fillTheBoardStd();
+            else fillTheBoard();
+        }
     }
 
     private void fillTheBoard(){
@@ -103,14 +114,17 @@ public class GameManager {
     }
 
     public void autoplay() {
-        for (int i = 0; i < playersNumber; i++) {
-            turns.put(new Player(i), new EndedTurnState());
+        if(turns.isEmpty()){
+            for (int i = 0; i < playersNumber; i++) {
+                turns.put(new Player(i), new EndedTurnState());
+            }
         }
         boolean done = false;
         while (!done) {
             for (Player p : turns.keySet()) {
                 if (turns.get(p) instanceof EndedTurnState) turns.put(p, new MovingTurnState());
                 int t1 = p.getLastTile();
+                app.setT1(t1);
                 turns.get(p).move(this, p, new DiceRollCommand());
                 int t2 = p.getLastTile();
 
@@ -136,7 +150,6 @@ public class GameManager {
                     app.update();
                     break;
                 }
-                app.setT1(t1);
                 app.setT2(t2);
                 app.setPlayer(p);
                 app.update();
@@ -181,11 +194,11 @@ public class GameManager {
 
     public void save(String name){
         try{
-            File f = new File(path+name);
+            File f = new File(path+name+".dat");
             if(!f.exists()){
                 f.createNewFile();
                 ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
-                oos.writeObject(new GameConfiguration(this.board,this.gameType));
+                oos.writeObject(new GameConfiguration(this.board,this.gameType,this.turns));
                 oos.flush();
                 oos.close();
             }
@@ -194,11 +207,20 @@ public class GameManager {
 
     public void load(String filename){
         try{
-            File f = new File(path + filename);
+            File f = new File(path + filename+".dat");
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
             GameConfiguration config = (GameConfiguration) ois.readObject();
             this.setBoard(config.gBoard);
             this.setGameType(config.gameType);
+            this.setTurns(config.gturns);
+
+            for(Player p : turns.keySet()){
+                p.setLastTile(1);
+                turns.put(p, new EndedTurnState());
+            }
+
+            if(config.gameType == GameType.Standard) this.setBuilder(new StdBoardBuilder());
+            else this.setBuilder(new SpecialRulesBuilder());
             ois.close();
         }catch (IOException | ClassNotFoundException e) {}
     }

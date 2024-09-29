@@ -39,9 +39,21 @@ public class Application extends JFrame {
 
     public void update(){
         JLabel label = new JLabel("P" + player.getPlayerIndex() + ">>" + msg);
+        System.out.println(label.getText());
+        label.setFont(new Font("Arial",Font.HANGING_BASELINE,13));
+        label.setPreferredSize(new Dimension(200,20));
         turnsPanel.add(label);
         turnsPanel.revalidate();
         turnsPanel.repaint();
+
+        int indexN = this.gm.getBoard().getTile(t2).getRow() * gm.getCols() + this.gm.getBoard().getTile(t2).getCol();
+        int indexP = this.gm.getBoard().getTile(t1).getRow() * gm.getCols() + this.gm.getBoard().getTile(t1).getCol();
+        JLabel dest = (JLabel) table.getComponent(indexN);
+        JLabel from = (JLabel) table.getComponent(indexP);
+        System.out.println(dest.getText());
+        System.out.println(from.getText());
+
+
 
         if(player.getLastTile() == gm.getMaxTiles()) {
             JOptionPane.showMessageDialog(this,"Player " + player.getPlayerIndex() + " won!");
@@ -101,11 +113,11 @@ public class Application extends JFrame {
         dimTR.setText(""+10);
         dimTC.setText(""+10);
 
-        players.setLayout(new GridLayout(1,3));
-        rows.setLayout(new GridLayout(1,3));
-        cols.setLayout(new GridLayout(1,3));
-        diceNumber.setLayout(new GridLayout(1,2));
-        gameType.setLayout(new GridLayout(1,2));
+        players.setLayout(new GridLayout(1,4));
+        rows.setLayout(new GridLayout(1,4));
+        cols.setLayout(new GridLayout(1,4));
+        diceNumber.setLayout(new GridLayout(1,3));
+        gameType.setLayout(new GridLayout(1,3));
 
         incr.setPreferredSize(new Dimension(50,50));
         decr.setPreferredSize(new Dimension(50,50));
@@ -208,19 +220,21 @@ public class Application extends JFrame {
             int diceN = dice[0];
             int rowsN = Integer.parseInt(dimTR.getText());
             int colsN = Integer.parseInt(dimTC.getText());
-            GameType gameTypeS = type[0];
 
+            this.gm.setApp(this);
             this.gm.setRows(rowsN);
             this.gm.setCols(colsN);
             this.gm.setDiceNumber(diceN);
             this.gm.setPlayersNumber(playersN);
-            if(gameTypeS == GameType.Standard) this.gm.setBuilder(new StdBoardBuilder());
-            else if(gameTypeS == GameType.MoreRules) this.gm.setBuilder(new SpecialRulesBuilder());
-            this.gm.setTurns(new HashMap<>());
+            this.gm.setMaxTiles(rowsN*colsN);
+
+            if(gm.getGameType() == GameType.Standard) this.gm.setBuilder(new StdBoardBuilder());
+            else if(gm.getGameType() == GameType.MoreRules) this.gm.setBuilder(new SpecialRulesBuilder());
+
             this.gm.createGame();
             // TODO visualizeTable() to show the game board;
-            visualizeGame(rowsN,colsN);
             parent.dispose();
+            visualizeGame(rowsN,colsN);
         });
 
         btns.add(cancel); btns.add(next); btns.add(loadConfig);
@@ -228,11 +242,11 @@ public class Application extends JFrame {
 
     private void visualizeGame(int rows, int cols){
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(1500,1000));
+        setPreferredSize(new Dimension(1220,900));
         table = new JPanel(new GridLayout(rows,cols));
 
-        table.setPreferredSize(new Dimension(1200,1000));
-        table.setBounds(0,0,1200,1000);
+        table.setPreferredSize(new Dimension(950,800));
+        table.setBounds(0,0,950,800);
 
         String content = "";
         for(int i = 0; i < rows; i++){
@@ -271,7 +285,7 @@ public class Application extends JFrame {
         turnsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         turnsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         turnsScrollPane.setPreferredSize(new Dimension(250, 800));
-        turnsScrollPane.setBounds(1250,0,250,800);
+        turnsScrollPane.setBounds(970,0,250,800);
         turnsScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
         this.add(turnsScrollPane, BorderLayout.EAST);
@@ -279,21 +293,29 @@ public class Application extends JFrame {
         repaint();
 
         btnPanel = new JPanel();
-        btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.X_AXIS));
-        btnPanel.setPreferredSize(new Dimension(1500,100));
-        btnPanel.setBounds(0,0,1500,100);
-        btnPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        btnPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        btnPanel.setPreferredSize(new Dimension(1200,100));
+        btnPanel.setBounds(0,0,1200,50);
 
         JButton start = new JButton("Start simulation");
         JCheckBox simType = new JCheckBox("Manual advancement");
         JButton roll = new JButton("Roll");
+        JButton saveConfig = new JButton("Save");
+
+        saveConfig.addActionListener(e -> {
+            String name = JOptionPane.showInputDialog("Insert save name: ");
+            gm.save(name);
+        });
 
         start.addActionListener(e -> {
             if(simType.isSelected()) {
 
-                for (int i = 0; i < gm.getPlayersNumber(); i++) {
-                    gm.getTurns().put(new Player(i), new EndedTurnState());
+                if(gm.getTurns() == null || gm.getTurns().isEmpty()){
+                    for (int i = 0; i < gm.getPlayersNumber(); i++) {
+                        gm.getTurns().put(new Player(i), new EndedTurnState());
+                    }
                 }
+
                 btnPanel.add(roll);
                 btnPanel.revalidate();
                 btnPanel.repaint();
@@ -312,6 +334,7 @@ public class Application extends JFrame {
         btnPanel.setAlignmentY(CENTER_ALIGNMENT);
         btnPanel.add(start);
         btnPanel.add(simType);
+        btnPanel.add(saveConfig);
         this.add(btnPanel, BorderLayout.SOUTH);
         revalidate();
         repaint();

@@ -31,7 +31,7 @@ public class PlayerMove implements Command {
         if(next > max){
             next = max - (next - max);
         }
-
+        System.out.println(next);
         Tile t = game.getBoard().getTile(next);
         if(t.getTileType() == TileType.Empty){
             player.setLastTile(t.getNumber());

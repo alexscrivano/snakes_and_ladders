@@ -224,9 +224,6 @@ public class Application extends JFrame {
                 parent.dispose();
                 visualizeGame(rowsN,colsN);
             }
-
-
-            // TODO visualizeTable() to show the game board;
         });
         cancel.addActionListener(e -> System.exit(0));
         loadConfig.addActionListener(e -> {
@@ -250,7 +247,6 @@ public class Application extends JFrame {
             else if(gm.getGameType() == GameType.MoreRules) this.gm.setBuilder(new SpecialRulesBuilder());
 
             this.gm.createGame();
-            // TODO visualizeTable() to show the game board;
             parent.dispose();
             visualizeGame(rowsN,colsN);
         });

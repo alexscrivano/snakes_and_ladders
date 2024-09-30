@@ -20,6 +20,7 @@ public class StoppedTurnState implements PlayerTurnState{
             stop();
         }
     }
+
     public int getStops() {return stops;}
     public void stop(){stops--;}
 

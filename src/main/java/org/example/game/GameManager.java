@@ -6,7 +6,6 @@ import org.example.board_components.builders.BoardBuilder;
 import org.example.board_components.builders.SpecialRulesBuilder;
 import org.example.board_components.builders.StdBoardBuilder;
 import org.example.board_components.tiles.Tile;
-import org.example.game.commands.PlayerMove;
 import org.example.game.commands.base_command.DiceRollCommand;
 import org.example.game.turns_states.StoppedTurnState;
 import org.example.support.tiles.TileType;
@@ -15,11 +14,9 @@ import org.example.game.turns_states.MovingTurnState;
 import org.example.game.turns_states.PlayerTurnState;
 import org.example.support.GameType;
 import org.example.support.Player;
-
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class GameManager {
 
@@ -38,6 +35,8 @@ public class GameManager {
 
     private int rows,cols,maxTiles;
     private int playersNumber,diceNumber;
+
+    private int rollmsg;
 
     private Map<Player, PlayerTurnState> turns;
 
@@ -73,6 +72,7 @@ public class GameManager {
     public void setGameType(GameType type){this.gameType = type;}
     public void setApp(Application app){this.app = app;}
     public void setMaxTiles(int maxTiles) {this.maxTiles = maxTiles;}
+    public void setRollmsg(int rollmsg){this.rollmsg = rollmsg;}
 
     public int getPlayersNumber(){return playersNumber;}
     public int getRows(){return rows;}
@@ -122,27 +122,30 @@ public class GameManager {
         boolean done = false;
         while (!done) {
             for (Player p : turns.keySet()) {
-                if (turns.get(p) instanceof EndedTurnState) turns.put(p, new MovingTurnState());
                 int t1 = p.getLastTile();
                 app.setT1(t1);
+
+                if (turns.get(p) instanceof EndedTurnState) turns.put(p, new MovingTurnState());
                 turns.get(p).move(this, p, new DiceRollCommand());
+
                 int t2 = p.getLastTile();
+                app.setT2(t2);
 
                 if (t1 < t2) {
                     System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
-                    app.setMsg(" moved from " + t1 + " to " + t2);
+                    app.setMsg(" rolled a " + rollmsg + " and moved from " + t1 + " to " + t2);
                 }else {
                     if(turns.get(p) instanceof StoppedTurnState){
                         System.out.println("Player " + p.getPlayerIndex() + " still on " + t2);
-                        app.setMsg(" stopped for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
+                        app.setMsg(" rolled a " + rollmsg + " but is stopped on " + t2 + " for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
                     }
                     else {
                         System.out.println("Player " + p.getPlayerIndex() + " come back to " + t2);
-                        app.setMsg(" come back to " + t2);
+                        app.setMsg(" rolled a " + rollmsg + " and come back to " + t2);
                     }
                 }
 
-                if (p.getLastTile() == maxTiles) {
+                if (t2 == maxTiles) {
                     done = true;
                     System.out.println("Player " + p.getPlayerIndex() + " won!");
                     app.setMsg(" moved from " + t1 + " to " + t2);
@@ -150,7 +153,6 @@ public class GameManager {
                     app.update();
                     break;
                 }
-                app.setT2(t2);
                 app.setPlayer(p);
                 app.update();
             }
@@ -163,19 +165,20 @@ public class GameManager {
             if(p.getPlayerIndex() == playerInd){
                 if (turns.get(p) instanceof EndedTurnState) turns.put(p, new MovingTurnState());
                 int t1 = p.getLastTile();
+
                 turns.get(p).move(this, p, new DiceRollCommand());
                 int t2 = p.getLastTile();
 
                 if (t1 < t2) {
                     System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
-                    app.setMsg(" moved from " + t1 + " to " + t2);
+                    app.setMsg(" rolled a " + rollmsg + " and moved from " + t1 + " to " + t2);
                 }else{
                     if(turns.get(p) instanceof StoppedTurnState){
                         System.out.println("Player " + p.getPlayerIndex() + " stopped on " + t2 + "for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
-                        app.setMsg(" stopped on " + t2 + " for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
+                        app.setMsg(" rolled a " + rollmsg + " but is stopped on " + t2 + " for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
                     }else{
                         System.out.println("Player " + p.getPlayerIndex() + " come back to " + t2);
-                        app.setMsg(" come back to " + t2);
+                        app.setMsg(" rolled a " + rollmsg + " and come back to " + t2);
                     }
                 }
                 if (p.getLastTile() == maxTiles) {

@@ -28,7 +28,7 @@ public class Application extends JFrame {
 
     public Application() {
         setTitle("Snakes and Ladders");
-        setSize(1500,1000);
+        setSize(1550,1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(true);
@@ -39,21 +39,39 @@ public class Application extends JFrame {
 
     public void update(){
         JLabel label = new JLabel("P" + player.getPlayerIndex() + ">>" + msg);
-        System.out.println(label.getText());
         label.setFont(new Font("Arial",Font.HANGING_BASELINE,13));
         label.setPreferredSize(new Dimension(200,20));
         turnsPanel.add(label);
         turnsPanel.revalidate();
         turnsPanel.repaint();
 
-        int indexN = this.gm.getBoard().getTile(t2).getRow() * gm.getCols() + this.gm.getBoard().getTile(t2).getCol();
-        int indexP = this.gm.getBoard().getTile(t1).getRow() * gm.getCols() + this.gm.getBoard().getTile(t1).getCol();
-        JLabel dest = (JLabel) table.getComponent(indexN);
-        JLabel from = (JLabel) table.getComponent(indexP);
-        System.out.println(dest.getText());
-        System.out.println(from.getText());
+        Tile ft = gm.getBoard().getTile(t1);
+        Tile dt = gm.getBoard().getTile(t2);
 
+        int index1,index2;
 
+        if(ft.getRow() % 2 == 0){
+            index2 = (ft.getRow()*gm.getCols()) + ft.getCol();
+        }else{
+            index2 = (ft.getRow()*gm.getCols()) + (gm.getCols() - 1 - ft.getCol());
+        }
+        if(dt.getRow() % 2 == 0){
+            index1 = (dt.getRow()*gm.getCols()) + dt.getCol();
+        }
+        else{
+            index1 = (dt.getRow()*gm.getCols()) + (gm.getCols() - 1 - dt.getCol());
+        }
+
+        JLabel label2 = (JLabel) table.getComponent(index2);
+        JLabel label1 = (JLabel) table.getComponent(index1);
+
+        String content = ft.getNumber() + ", " + ft.getTileType();
+        if(ft.getTileType() == TileType.Snake || ft.getTileType() == TileType.Ladder){
+            content += " -> " + ft.getDestination().getNumber();
+        }
+
+        label2.setText(content);
+        label1.setText(dt.getNumber() + " - P" + player.getPlayerIndex());
 
         if(player.getLastTile() == gm.getMaxTiles()) {
             JOptionPane.showMessageDialog(this,"Player " + player.getPlayerIndex() + " won!");
@@ -242,7 +260,7 @@ public class Application extends JFrame {
 
     private void visualizeGame(int rows, int cols){
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(1220,900));
+        setPreferredSize(new Dimension(1270,900));
         table = new JPanel(new GridLayout(rows,cols));
 
         table.setPreferredSize(new Dimension(950,800));
@@ -284,8 +302,8 @@ public class Application extends JFrame {
 
         turnsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         turnsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        turnsScrollPane.setPreferredSize(new Dimension(250, 800));
-        turnsScrollPane.setBounds(970,0,250,800);
+        turnsScrollPane.setPreferredSize(new Dimension(300, 800));
+        turnsScrollPane.setBounds(1040,0,300,800);
         turnsScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
         this.add(turnsScrollPane, BorderLayout.EAST);

@@ -42,7 +42,9 @@ public class MovingTurnState implements PlayerTurnState {
             total = ((DiceRollCommand)command).getDice1();
             moveTo(player,total);
         }
+        g.setRollmsg(total);
     }
+
 
     private void moveTo(Player player, int total) {
         PlayerMove playerMove = new PlayerMove(g,total,player);

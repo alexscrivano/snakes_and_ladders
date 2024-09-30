@@ -7,4 +7,5 @@ import org.example.support.Player;
 public class EndedTurnState implements PlayerTurnState {
     @Override
     public void move(GameManager game, Player player, Command command) {} //do nothing
+
 }

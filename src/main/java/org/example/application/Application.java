@@ -266,7 +266,7 @@ public class Application extends JFrame {
         table.setPreferredSize(new Dimension(950,800));
         table.setBounds(0,0,950,800);
 
-        String content = "";
+        String content;
         for(int i = 0; i < rows; i++){
             if(i % 2 == 0){
                 for(int j = 0; j < cols; j++){
@@ -344,7 +344,6 @@ public class Application extends JFrame {
         roll.addActionListener(e -> {
             i[0] += 1;
             int indx = (i[0]) % gm.getPlayersNumber();
-            System.out.println(indx);
             gm.manual(indx);
         });
 

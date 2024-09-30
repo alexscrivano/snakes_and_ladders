@@ -63,7 +63,6 @@ public class GameManager {
     public void setBoard(GameBoard board){
         this.board = new GameBoard();
         for(Tile t : board.getBoard().values()) {
-            System.out.println(t.getNumber());
             this.board.addTile(t);
         }
     }
@@ -86,7 +85,6 @@ public class GameManager {
 
     public void createGame(){
         builder.buildBoard();
-        System.out.println("Board created!");
         if(board == null) {
             this.board = builder.getGameBoard();
             if(gameType == GameType.Standard) fillTheBoardStd();
@@ -132,22 +130,18 @@ public class GameManager {
                 app.setT2(t2);
 
                 if (t1 < t2) {
-                    System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
                     app.setMsg(" rolled a " + rollmsg + " and moved from " + t1 + " to " + t2);
                 }else {
                     if(turns.get(p) instanceof StoppedTurnState){
-                        System.out.println("Player " + p.getPlayerIndex() + " still on " + t2);
                         app.setMsg(" rolled a " + rollmsg + " but is stopped on " + t2 + " for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
                     }
                     else {
-                        System.out.println("Player " + p.getPlayerIndex() + " come back to " + t2);
                         app.setMsg(" rolled a " + rollmsg + " and come back to " + t2);
                     }
                 }
 
                 if (t2 == maxTiles) {
                     done = true;
-                    System.out.println("Player " + p.getPlayerIndex() + " won!");
                     app.setMsg(" moved from " + t1 + " to " + t2);
                     app.setPlayer(p);
                     app.update();
@@ -170,19 +164,15 @@ public class GameManager {
                 int t2 = p.getLastTile();
 
                 if (t1 < t2) {
-                    System.out.println("Player " + p.getPlayerIndex() + " moved from " + t1 + " to " + t2);
                     app.setMsg(" rolled a " + rollmsg + " and moved from " + t1 + " to " + t2);
                 }else{
                     if(turns.get(p) instanceof StoppedTurnState){
-                        System.out.println("Player " + p.getPlayerIndex() + " stopped on " + t2 + "for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
                         app.setMsg(" rolled a " + rollmsg + " but is stopped on " + t2 + " for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
                     }else{
-                        System.out.println("Player " + p.getPlayerIndex() + " come back to " + t2);
                         app.setMsg(" rolled a " + rollmsg + " and come back to " + t2);
                     }
                 }
                 if (p.getLastTile() == maxTiles) {
-                    System.out.println("Player " + p.getPlayerIndex() + " won!");
                     app.setMsg(" moved from " + t1 + " to " + t2);
                 }
 

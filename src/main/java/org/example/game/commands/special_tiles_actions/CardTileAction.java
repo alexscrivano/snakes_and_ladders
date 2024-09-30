@@ -29,46 +29,31 @@ public class CardTileAction implements Command {
 
         switch (card) {
             case Panchina -> {
-                System.out.printf("Player %d drawed a %s card, stopped for 1 turn", player.getPlayerIndex(),card);
-                System.out.println();
                 int stops = 1;
                 game.getTurns().put(player,new StoppedTurnState(stops));
             }
 
             case Locanda -> {
-                System.out.printf("Player %d drawed a %s card, stopped for 3 turns", player.getPlayerIndex(), card);
-                System.out.println();
                 int stops = 3;
                 game.getTurns().put(player,new StoppedTurnState(stops));
             }
 
             case Molla -> {
-                System.out.printf("Player %d drawed a %s card", player.getPlayerIndex(),card);
-                System.out.println();
                 PriceTileAction action = new PriceTileAction(game,player,tile,roll, PriceType.Molla);
                 player.setCard(null);
-                System.out.printf("Player %d used a %s card", player.getPlayerIndex(),Cards.Molla.name());
-                System.out.println();
                 action.execute();
             }
 
             case Dadi -> {
-                System.out.printf("Player %d drawed a %s card", player.getPlayerIndex(),card);
-                System.out.println();
                 PriceTileAction action = new PriceTileAction(game,player,tile,roll, PriceType.Dadi);
                 player.setCard(null);
-                System.out.printf("Player %d used a %s card", player.getPlayerIndex(),Cards.Dadi.name());
-                System.out.println();
                 action.execute();
             }
 
             case DivietoDiSosta -> {
-                System.out.printf("Player %d drawed a %s card", player.getPlayerIndex(),card);
-                System.out.println();
                 player.setCard(Cards.DivietoDiSosta);
                 if(game.getTurns().get(player) instanceof StoppedTurnState){
                     player.setCard(null);
-                    System.out.printf("Player %d used his %s card", player.getPlayerIndex(),card);
                     game.getTurns().put(player, new EndedTurnState());
                 }
             }

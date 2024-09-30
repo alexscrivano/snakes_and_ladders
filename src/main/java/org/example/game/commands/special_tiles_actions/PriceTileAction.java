@@ -25,8 +25,6 @@ public class PriceTileAction implements Command {
         DiceRollCommand rollCommand = new DiceRollCommand();
         int num = game.getDiceNumber();
         rollCommand.execute();
-        System.out.printf("Player %d landed on a %s tile", player.getPlayerIndex(), priceType);
-        System.out.println();
         switch (priceType) {
             case Molla -> {
                 nextTile += roll;

@@ -23,7 +23,6 @@ public class PlayerMove implements Command {
     @Override
     public void execute() {
         Map<Player, PlayerTurnState> turns = game.getTurns();
-        System.out.println("Player " + player.getPlayerIndex() + " rolled a " + roll);
 
         int currentTile = player.getLastTile();
         int max = game.getMaxTiles();
@@ -31,7 +30,6 @@ public class PlayerMove implements Command {
         if(next > max){
             next = max - (next - max);
         }
-
         Tile t = game.getBoard().getTile(next);
         if(t.getTileType() == TileType.Empty){
             player.setLastTile(t.getNumber());

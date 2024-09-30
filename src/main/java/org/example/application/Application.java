@@ -218,6 +218,8 @@ public class Application extends JFrame {
 
             if(gameTypeS == null || diceN < 0){
                 JOptionPane.showMessageDialog(this, "Please choose dice number and game type");
+            }else if((rowsN <= 2 || colsN <= 2) || (playersN < 2)){
+                JOptionPane.showMessageDialog(this, "Minimum size is 3x3 and minimum players is 2");
             }else{
                 this.gm = new GameManager(rowsN,colsN,playersN,diceN,gameTypeS, this);
                 this.gm.createGame();

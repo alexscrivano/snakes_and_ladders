@@ -25,7 +25,7 @@ public class GameManager {
             GameType gameType,
             Map<Player,PlayerTurnState> gturns
     )implements Serializable {}
-    private final String path = System.getProperty("user.dir") + "\\src\\main\\resources\\savings";
+    private final String path = ".\\Documents\\";
 
 
     private Application app;

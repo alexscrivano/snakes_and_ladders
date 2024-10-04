@@ -17,6 +17,7 @@ import org.example.support.Player;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameManager {
 
@@ -112,47 +113,68 @@ public class GameManager {
         builder.buildLadders(maxTiles,rows,m);
     }
 
+    private class AutoUpdate extends Thread{
+        private Application app;
+        public AutoUpdate(Application app){
+            this.app = app;
+        }
+        @Override
+        public void run() {
+            try{
+                Thread.sleep(1000);
+                app.update();
+            }catch (InterruptedException e){}
+        }
+
+    }
+
     public void autoplay() {
         if(turns.isEmpty()){
             for (int i = 0; i < playersNumber; i++) {
                 turns.put(new Player(i), new EndedTurnState());
             }
         }
-        boolean done = false;
-        while (!done) {
-            for (Player p : turns.keySet()) {
-                int t1 = p.getLastTile();
-                app.setT1(t1);
+        AtomicBoolean done = new AtomicBoolean(false);
+        new Thread(()->{
+            while (!done.get()) {
+                for (Player p : turns.keySet()) {
+                    try{Thread.sleep(1000);} catch (InterruptedException e){}
+                    int t1 = p.getLastTile();
+                    app.setT1(t1);
 
-                if (turns.get(p) instanceof EndedTurnState) turns.put(p, new MovingTurnState());
-                turns.get(p).move(this, p, new DiceRollCommand());
+                    if (turns.get(p) instanceof EndedTurnState) turns.put(p, new MovingTurnState());
 
-                int t2 = p.getLastTile();
-                app.setT2(t2);
+                    turns.get(p).move(this, p, new DiceRollCommand());
 
-                if (t1 < t2) {
-                    app.setMsg(" rolled a " + rollmsg + " and moved from " + t1 + " to " + t2);
-                }else {
-                    if(turns.get(p) instanceof StoppedTurnState){
-                        app.setMsg(" rolled a " + rollmsg + " but is stopped on " + t2 + " for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
+                    int t2 = p.getLastTile();
+                    app.setT2(t2);
+
+                    if (t1 < t2) {
+                        app.setMsg(" rolled a " + rollmsg + " and moved from " + t1 + " to " + t2);
+                    }else {
+                        if(turns.get(p) instanceof StoppedTurnState){
+                            app.setMsg(" rolled a " + rollmsg + " but is stopped on " + t2 + " for " + ((StoppedTurnState) turns.get(p)).getStops() + " turns");
+                        }
+                        else {
+                            app.setMsg(" rolled a " + rollmsg + " and come back to " + t2);
+                        }
                     }
-                    else {
-                        app.setMsg(" rolled a " + rollmsg + " and come back to " + t2);
-                    }
-                }
 
-                if (t2 == maxTiles) {
-                    done = true;
-                    app.setMsg(" moved from " + t1 + " to " + t2);
+                    if (t2 == maxTiles) {
+                        done.set(true);
+                        app.setMsg(" moved from " + t1 + " to " + t2);
+                        app.setPlayer(p);
+                        app.update();
+                        break;
+                    }
                     app.setPlayer(p);
                     app.update();
-                    break;
                 }
-                app.setPlayer(p);
-                app.update();
+
             }
 
-        }
+        }).start();
+
     }
 
     public void manual(int playerInd){

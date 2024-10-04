@@ -11,6 +11,7 @@ import org.example.support.tiles.TileType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 public class Application extends JFrame {
@@ -39,7 +40,7 @@ public class Application extends JFrame {
 
     public void update(){
         JLabel label = new JLabel("P" + player.getPlayerIndex() + ">>" + msg);
-        label.setFont(new Font("Arial",Font.HANGING_BASELINE,13));
+        label.setFont(new Font("Arial", Font.ITALIC,13));
         label.setPreferredSize(new Dimension(200,20));
         turnsPanel.add(label);
         turnsPanel.revalidate();
